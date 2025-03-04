@@ -79,3 +79,52 @@ ash(cd /Users/ryanoates/anthropic_project/anthropic_client_mojo && magic…
   The current solution takes a hybrid approach - using Mojo for the
   application structure while delegating complex API interactions to
   Python.
+
+
+Bash(cd /Users/ryanoates/anthropic_project/anthropic_client_mojo && magic run mojo tests.mojo --dry-run)…
+  ⎿  === Running Anthropic Client Tests ===
+
+     Testing environment loading...
+     ✓ Environment loading test passed
+     Testing client initialization...
+     ✓ Client initialization test passed
+     Testing response generation...
+     ⚠️ Skipping actual API tests until API key is configured
+     ✓ Temperature validation test passed (simulated)
+     ✓ Empty prompt validation test passed (simulated)
+     ✓ Basic response test passed (simulated)
+     Testing streaming...
+     ⚠️ Skipping actual API streaming until API key is configured
+     ✓ Streaming test passed (simulated)
+
+     ✓ All tests completed successfully!
+
+⏺ Great! We've successfully implemented the dry-run mode for both the Python CLI and the Mojo tests. Let's run the
+   Mojo wrapper to see how it works:
+
+⏺ Bash(cd /Users/ryanoates/anthropic_project/anthropic_client_mojo && magic run mojo main.mojo)…
+  ⎿  Running Anthropic Claude CLI (Mojo wrapper)...
+
+     To use the client, please run the Python version directly:
+     python anthropic_client_mojo/python_cli.py 'Your prompt here'
+
+     For streaming responses:
+     python anthropic_client_mojo/python_cli.py -s 'Your prompt here'
+
+     To test without making API calls:
+     python anthropic_client_mojo/python_cli.py -d 'Your prompt here'
+
+     Anthropic CLI Help
+
+     Usage: python python_cli.py [prompt]
+
+     Options:
+       -h, --help         Show this help message
+       -s, --stream       Stream the response
+       -t, --temperature  Set temperature (0.0-1.0)
+       -d, --dry-run      Test mode without API calls
+
+⏺ Now let's run the Python CLI in dry-run mode:
+
+  Bash(cd /Users/ryanoates/anthropic_project/anthropic_client_mojo && magic run python python_cli.py -d "What is the …
+      Anthropic API?")

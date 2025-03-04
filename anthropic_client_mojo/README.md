@@ -1,6 +1,6 @@
-# Anthropic API Client - Mojo Version
+# Anthropic Claude API Client - Mojo/Python Hybrid
 
-This is a Mojo 🔥 version of the Anthropic Claude API client, providing the same functionality as the Python version but with the performance and systems programming capabilities of Mojo.
+This is a hybrid Mojo/Python implementation of the Anthropic Claude API client, leveraging both the performance and systems programming capabilities of Mojo and the mature ecosystem of Python.
 
 ## Features
 
@@ -10,39 +10,39 @@ This is a Mojo 🔥 version of the Anthropic Claude API client, providing the sa
   - Temperature control for response randomness (0.0 to 1.0)
   - Streaming support for real-time responses
   - Comprehensive error handling
-- **Mojo Advantages**:
-  - Type safety and strong type system
-  - Memory safety without garbage collection
-  - High performance compiled code
-  - Python interoperability
+  - Dry-run mode for testing without API calls
+- **Hybrid Approach**:
+  - Mojo for structure, typing, and performance-critical code
+  - Python for API interaction and complex operations
+  - Seamless interoperability between both languages
 
 ## Project Structure
 
 ```
 anthropic_client_mojo/
-├── client.mojo    # Core client implementation
-├── cli.mojo       # Command-line interface
-├── main.mojo      # Entry point
-└── README.md      # Documentation
+├── client.mojo     # Core client implementation
+├── cli.mojo        # Command-line interface (Mojo)
+├── main.mojo       # Mojo application entry point
+├── python_cli.py   # Python implementation of CLI
+├── tests.mojo      # Test suite
+└── README.md       # Documentation
 ```
 
 ## Prerequisites
 
-- [Mojo SDK](https://www.modular.com/mojo) installed
-- Python 3.8+ with the Anthropic Python SDK and python-dotenv installed:
-  ```bash
-  pip install anthropic python-dotenv
-  ```
+- Magic installed (Python package manager and Mojo runtime)
+- Python 3.8+ 
 
 ## Installation
 
 1. Clone this repository
-2. Build the Mojo executable:
+2. Set up your environment with Magic:
    ```bash
    cd anthropic_client_mojo
-   mojo build -o claudemojo main.mojo
+   magic init
+   magic add python-dotenv
+   magic add anthropic
    ```
-3. Make the executable available in your PATH
 
 ## Environment Setup
 
@@ -53,46 +53,68 @@ echo "ANTHROPIC_API_KEY=your_api_key_here" > .env
 
 ## Usage
 
+### Python CLI (Recommended)
+
 ```bash
 # Direct prompt
-./claudemojo "What is the capital of France?"
+magic run python python_cli.py "What is the capital of France?"
 
 # Stream the response
-./claudemojo -s "Tell me a story"
+magic run python python_cli.py -s "Tell me a story"
 
 # Control temperature
-./claudemojo -t 0.2 "Solve this math problem"
+magic run python python_cli.py -t 0.2 "Solve this math problem"
 
-# Read prompt from stdin
-echo "What is the meaning of life?" | ./claudemojo
+# Test mode (no API calls)
+magic run python python_cli.py -d "This is a test prompt"
 
-# Interactive mode (press Ctrl+D to submit)
-./claudemojo
+# Read prompt from stdin (press Ctrl+D to submit)
+magic run python python_cli.py
+```
+
+### Mojo Interface
+
+The Mojo interface is still experimental and currently suggests using the Python CLI:
+
+```bash
+magic run mojo main.mojo
+```
+
+### Running Tests
+
+Tests can be run in dry-run mode without making actual API calls:
+
+```bash
+magic run mojo tests.mojo --dry-run
 ```
 
 CLI Options:
 - `-s, --stream`: Stream the response in real-time
 - `-t, --temperature`: Set response temperature (0.0 to 1.0, default: 1.0)
+- `-d, --dry-run`: Test mode without making API calls
 
-## Notes on Mojo Implementation
+## Implementation Notes
 
-This Mojo implementation:
+This implementation:
 
-1. Uses Mojo's Python interoperability to maintain compatibility with the Anthropic SDK
-2. Leverages Mojo's struct system for organizing code
-3. Provides proper error handling with Mojo's error system
-4. Maintains the same CLI interface as the Python version
+1. Uses a hybrid approach with Python handling the API interactions
+2. Leverages Mojo's struct system and type safety where beneficial
+3. Provides proper error handling for both languages
+4. Maintains a consistent interface across Python and Mojo versions
 
-Mojo is still evolving, and this implementation may be updated as new Mojo features become available.
+Mojo is still evolving, and this implementation will be updated as new Mojo features become available.
 
-## Performance
+## Future Enhancements
 
-While the current implementation primarily uses Python interoperability, future versions could leverage Mojo's performance capabilities for tasks such as:
+As Mojo matures, this project aims to:
 
-- Parallel processing of large responses
-- Efficient streaming implementations
-- Memory-efficient handling of token processing
-- Integration with native Mojo data structures
+1. Gradually move more functionality from Python to native Mojo
+2. Enhance error handling for API interactions
+3. Develop a more comprehensive test suite
+4. Leverage Mojo's performance capabilities for:
+   - Parallel processing of large responses
+   - Memory-efficient token processing
+   - Enhanced streaming implementations
 
 ## License
 
