@@ -1,0 +1,15 @@
+#!/bin/bash
+# claudethinkfile - Save Claude's response to a file
+
+PROJECT_DIR="/Users/ryanoates/anthropic_project/anthropic_client_mojo"
+cd "$PROJECT_DIR"
+export PIXI_PROJECT_MANIFEST="$PROJECT_DIR/pixi.toml"
+
+if [ "$#" -lt 2 ]; then
+  echo "Usage: claudethinkfile <output_file> <prompt>"
+  exit 1
+fi
+
+output_file="$1"
+shift
+python "$PROJECT_DIR/python_cli.py" -o "$output_file" "$@"

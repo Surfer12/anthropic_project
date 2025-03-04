@@ -98,16 +98,47 @@ claudethink -s "Tell me a story"
 # Control temperature
 claudethink -t 0.2 "Solve this math problem"
 
+# Use a specific model
+claudethink -m claude-3-opus-20240229 "Complex analysis task"
+
+# Save response to file
+claudethink -o response.txt "Generate a report"
+
+# Output in JSON format
+claudethink -f json "What's the weather?"
+
+# Set system message for context
+claudethink --system "You are a helpful coding assistant" "Help me with Python"
+
+# Control thinking budget
+claudethink -b 64000 "Summarize this text"
+
 # Read prompt from stdin
 echo "What is the meaning of life?" | claudethink
 
 # Interactive mode (press Ctrl+D to submit)
 claudethink
+
+# Check version
+claudethink -v
 ```
 
 CLI Options:
 - `-s, --stream`: Stream the response in real-time
 - `-t, --temperature`: Set response temperature (0.0 to 1.0, default: 1.0)
+- `-m, --model`: Choose Claude model (default: claude-3-7-sonnet-20250219)
+- `-b, --budget`: Set thinking budget in tokens (1 to 128000, default: 120000)
+- `-f, --format`: Output format (text or JSON, default: text)
+- `-o, --output`: Save response to specified file
+- `--system`: Set system message for context
+- `-d, --dry-run`: Test mode without making API calls
+- `-v, --version`: Show version information
+
+Available Models:
+- claude-3-7-sonnet-20250219 (default)
+- claude-3-opus-20240229
+- claude-3-sonnet-20240229
+- claude-3-haiku-20240307
 
 ## Development
 

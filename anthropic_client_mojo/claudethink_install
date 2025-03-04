@@ -14,6 +14,7 @@ cat > "$PROJECT_DIR/bin/claudethinkmojo" << 'EOF'
 
 PROJECT_DIR="/Users/ryanoates/anthropic_project/anthropic_client_mojo"
 cd "$PROJECT_DIR"
+export PIXI_PROJECT_MANIFEST="$PROJECT_DIR/pixi.toml"
 python "$PROJECT_DIR/python_cli.py" "$@"
 EOF
 
@@ -24,6 +25,7 @@ cat > "$PROJECT_DIR/bin/claudethinkstream" << 'EOF'
 
 PROJECT_DIR="/Users/ryanoates/anthropic_project/anthropic_client_mojo"
 cd "$PROJECT_DIR"
+export PIXI_PROJECT_MANIFEST="$PROJECT_DIR/pixi.toml"
 python "$PROJECT_DIR/python_cli.py" -s "$@"
 EOF
 
@@ -34,6 +36,7 @@ cat > "$PROJECT_DIR/bin/claudethinkfast" << 'EOF'
 
 PROJECT_DIR="/Users/ryanoates/anthropic_project/anthropic_client_mojo"
 cd "$PROJECT_DIR"
+export PIXI_PROJECT_MANIFEST="$PROJECT_DIR/pixi.toml"
 python "$PROJECT_DIR/python_cli.py" -t 0.3 "$@"
 EOF
 
@@ -44,7 +47,49 @@ cat > "$PROJECT_DIR/bin/claudethinkdry" << 'EOF'
 
 PROJECT_DIR="/Users/ryanoates/anthropic_project/anthropic_client_mojo"
 cd "$PROJECT_DIR"
+export PIXI_PROJECT_MANIFEST="$PROJECT_DIR/pixi.toml"
 python "$PROJECT_DIR/python_cli.py" -d "$@"
+EOF
+
+# Create claudethinkjson
+cat > "$PROJECT_DIR/bin/claudethinkjson" << 'EOF'
+#!/bin/bash
+# claudethinkjson - Get Claude's response in JSON format
+
+PROJECT_DIR="/Users/ryanoates/anthropic_project/anthropic_client_mojo"
+cd "$PROJECT_DIR"
+export PIXI_PROJECT_MANIFEST="$PROJECT_DIR/pixi.toml"
+python "$PROJECT_DIR/python_cli.py" -f json "$@"
+EOF
+
+# Create claudethinkhaiku
+cat > "$PROJECT_DIR/bin/claudethinkhaiku" << 'EOF'
+#!/bin/bash
+# claudethinkhaiku - Use the Claude Haiku model (smaller/faster)
+
+PROJECT_DIR="/Users/ryanoates/anthropic_project/anthropic_client_mojo"
+cd "$PROJECT_DIR"
+export PIXI_PROJECT_MANIFEST="$PROJECT_DIR/pixi.toml"
+python "$PROJECT_DIR/python_cli.py" -m claude-3-5-haiku-20241022 "$@"
+EOF
+
+# Create claudethinkfile
+cat > "$PROJECT_DIR/bin/claudethinkfile" << 'EOF'
+#!/bin/bash
+# claudethinkfile - Save Claude's response to a file
+
+PROJECT_DIR="/Users/ryanoates/anthropic_project/anthropic_client_mojo"
+cd "$PROJECT_DIR"
+export PIXI_PROJECT_MANIFEST="$PROJECT_DIR/pixi.toml"
+
+if [ "$#" -lt 2 ]; then
+  echo "Usage: claudethinkfile <output_file> <prompt>"
+  exit 1
+fi
+
+output_file="$1"
+shift
+python "$PROJECT_DIR/python_cli.py" -o "$output_file" "$@"
 EOF
 
 # Make the scripts executable
@@ -52,6 +97,9 @@ chmod +x "$PROJECT_DIR/bin/claudethinkmojo"
 chmod +x "$PROJECT_DIR/bin/claudethinkstream"
 chmod +x "$PROJECT_DIR/bin/claudethinkfast"
 chmod +x "$PROJECT_DIR/bin/claudethinkdry"
+chmod +x "$PROJECT_DIR/bin/claudethinkjson"
+chmod +x "$PROJECT_DIR/bin/claudethinkhaiku"
+chmod +x "$PROJECT_DIR/bin/claudethinkfile"
 
 echo "Scripts created in $PROJECT_DIR/bin"
 echo ""
@@ -63,3 +111,10 @@ echo "sudo ln -s $PROJECT_DIR/bin/claudethinkmojo /usr/local/bin/claudethinkmojo
 echo "sudo ln -s $PROJECT_DIR/bin/claudethinkstream /usr/local/bin/claudethinkstream"
 echo "sudo ln -s $PROJECT_DIR/bin/claudethinkfast /usr/local/bin/claudethinkfast"
 echo "sudo ln -s $PROJECT_DIR/bin/claudethinkdry /usr/local/bin/claudethinkdry"
+echo "sudo ln -s $PROJECT_DIR/bin/claudethinkjson /usr/local/bin/claudethinkjson"
+echo "sudo ln -s $PROJECT_DIR/bin/claudethinkhaiku /usr/local/bin/claudethinkhaiku"
+echo "sudo ln -s $PROJECT_DIR/bin/claudethinkfile /usr/local/bin/claudethinkfile"
+echo ""
+echo "Or add the bin directory to your PATH in your shell profile (~/.bashrc, ~/.zshrc, etc.):"
+echo "echo 'export PATH=\"$PROJECT_DIR/bin:\$PATH\"' >> ~/.zshrc"
+echo "source ~/.zshrc"
