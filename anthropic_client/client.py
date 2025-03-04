@@ -35,7 +35,7 @@ class AnthropicClient:
             ],
             "thinking": {
                 "type": "enabled",
-                "budget_tokens": 128000
+                "budget_tokens": 120000
             },
             "betas": ["output-128k-2025-02-19"]
         }

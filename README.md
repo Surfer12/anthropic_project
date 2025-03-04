@@ -87,19 +87,19 @@ The CLI supports both direct prompts and stdin input:
 
 ```bash
 # Direct prompt
-claude "What is the capital of France?"
+claudethink "What is the capital of France?"
 
 # Stream the response
-claude -s "Tell me a story"
+claudethink -s "Tell me a story"
 
 # Control temperature
-claude -t 0.2 "Solve this math problem"
+claudethink -t 0.2 "Solve this math problem"
 
 # Read prompt from stdin
-echo "What is the meaning of life?" | claude
+echo "What is the meaning of life?" | claudethink
 
 # Interactive mode (press Ctrl+D to submit)
-claude
+claudethink
 ```
 
 CLI Options:
