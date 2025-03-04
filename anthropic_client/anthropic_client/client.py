@@ -1,3 +1,7 @@
+"""
+Core client implementation for interacting with Anthropic's Claude models.
+"""
+
 import os
 from typing import Optional, Iterator, Union
 import anthropic
@@ -41,8 +45,4 @@ class AnthropicClient:
             return (chunk.content[0].text for chunk in response)
         else:
             response = self.client.beta.messages.create(**message_params)
-            return response.content[0].text
-
-if __name__ == "__main__":
-    client = AnthropicClient()
-    print(client.get_response("Hello, Claude!"))
+            return response.content[0].text 

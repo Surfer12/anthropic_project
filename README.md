@@ -17,17 +17,47 @@ This project provides a Python client and CLI for interacting with Anthropic's C
   - Comprehensive error handling
   - Environment-based configuration
 
-## Setup
+## Project Structure
+
+```
+anthropic_client/
+├── anthropic_client/
+│   ├── __init__.py
+│   ├── client.py    # Core client implementation
+│   └── cli.py       # Command-line interface
+├── tests/
+│   └── test_*.py    # Test files
+├── README.md
+├── setup.py         # Package configuration
+└── requirements.txt # Development dependencies
+```
+
+## Installation
+
+### Using Magic (Recommended)
 
 1. Install dependencies using Magic (from Modular):
    ```bash
    magic install
    ```
 
-2. Create a `.env` file with your Anthropic API key:
+2. Install the package in development mode:
    ```bash
-   echo "ANTHROPIC_API_KEY=your_api_key_here" > .env
+   magic run pip install -e .
    ```
+
+### Using pip
+
+```bash
+pip install .
+```
+
+### Environment Setup
+
+Create a `.env` file with your Anthropic API key:
+```bash
+echo "ANTHROPIC_API_KEY=your_api_key_here" > .env
+```
 
 ## Usage
 
@@ -57,26 +87,28 @@ The CLI supports both direct prompts and stdin input:
 
 ```bash
 # Direct prompt
-magic run python cli.py "What is the capital of France?"
+claude "What is the capital of France?"
 
 # Stream the response
-magic run python cli.py -s "Tell me a story"
+claude -s "Tell me a story"
 
 # Control temperature
-magic run python cli.py -t 0.2 "Solve this math problem"
+claude -t 0.2 "Solve this math problem"
 
 # Read prompt from stdin
-echo "What is the meaning of life?" | magic run python cli.py
+echo "What is the meaning of life?" | claude
 
 # Interactive mode (press Ctrl+D to submit)
-magic run python cli.py
+claude
 ```
 
 CLI Options:
 - `-s, --stream`: Stream the response in real-time
 - `-t, --temperature`: Set response temperature (0.0 to 1.0, default: 1.0)
 
-## Testing
+## Development
+
+### Testing
 
 The project includes a comprehensive test suite:
 
@@ -91,10 +123,10 @@ magic run pytest -v
 magic run pytest tests/test_anthropic_client.py
 ```
 
-## Dependencies
+### Dependencies
 
-- anthropic - Core API client library (latest version)
-- python-dotenv - Environment variable management
+- anthropic (>=0.18.1) - Core API client library
+- python-dotenv (>=1.0.0) - Environment variable management
 - pytest - Testing framework
 - flake8 - Code linting
 - mypy - Type checking

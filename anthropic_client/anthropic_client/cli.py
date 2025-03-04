@@ -1,8 +1,11 @@
-#!/usr/bin/env python3
+"""
+Command line interface for the Anthropic Claude API client.
+"""
+
 import argparse
 import sys
 import time
-from anthropic_client import AnthropicClient
+from .client import AnthropicClient
 
 def create_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
