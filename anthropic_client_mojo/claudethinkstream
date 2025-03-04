@@ -1,0 +1,5 @@
+#!/bin/bash
+# claudethinkstream - Stream a response from Claude with thinking enabled (Mojo version)
+
+cd "$(dirname "$0")"
+magic run mojo main.mojo -s "$@"

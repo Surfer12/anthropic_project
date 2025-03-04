@@ -1,0 +1,5 @@
+#!/bin/bash
+# claudethinkfast - Send a prompt to Claude with lower temperature (Mojo version)
+
+cd "$(dirname "$0")"
+magic run mojo main.mojo -t 0.3 "$@"

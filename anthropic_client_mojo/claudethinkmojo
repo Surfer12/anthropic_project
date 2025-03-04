@@ -1,0 +1,5 @@
+#!/bin/bash
+# claudethinkmojo - Send a prompt to Claude with thinking enabled (Mojo version)
+
+cd "$(dirname "$0")"
+magic run mojo main.mojo "$@"

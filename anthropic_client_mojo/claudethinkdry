@@ -1,0 +1,5 @@
+#!/bin/bash
+# claudethinkdry - Test Claude interaction without making API calls (Mojo version)
+
+cd "$(dirname "$0")"
+magic run python python_cli.py -d "$@"
