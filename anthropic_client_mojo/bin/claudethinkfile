@@ -12,4 +12,4 @@ fi
 
 output_file="$1"
 shift
-python "$PROJECT_DIR/python_cli.py" -o "$output_file" "$@"
+magic run python "$PROJECT_DIR/python_cli.py" -o "$output_file" "$@"

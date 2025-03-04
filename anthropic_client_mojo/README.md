@@ -53,7 +53,46 @@ echo "ANTHROPIC_API_KEY=your_api_key_here" > .env
 
 ## Usage
 
-### Python CLI (Recommended)
+### Command-Line Tools (Recommended)
+
+We provide several command-line tools for easy interaction with Claude:
+
+```bash
+# Install the CLI tools
+chmod +x claudethink_install
+./claudethink_install
+```
+
+Then follow the instructions to add the tools to your PATH.
+
+```bash
+# Basic usage - send a prompt to Claude
+claudethinkmojo "What is the capital of France?"
+
+# Stream the response in real-time
+claudethinkstream "Tell me a story"
+
+# Use lower temperature for more deterministic responses
+claudethinkfast "Solve this math problem"
+
+# Test mode without making API calls
+claudethinkdry "This is a test prompt"
+
+# Get response in JSON format
+claudethinkjson "List the top 5 programming languages" > languages.json
+
+# Use the faster Haiku model
+claudethinkhaiku "Give me a quick summary of the French Revolution"
+
+# Save response to a file
+claudethinkfile output.md "Write documentation for a REST API"
+```
+
+See [CLI.md](CLI.md) for complete documentation on the command-line tools.
+
+### Python CLI (Direct Usage)
+
+You can also use the Python CLI directly:
 
 ```bash
 # Direct prompt
@@ -88,10 +127,20 @@ Tests can be run in dry-run mode without making actual API calls:
 magic run mojo tests.mojo --dry-run
 ```
 
-CLI Options:
-- `-s, --stream`: Stream the response in real-time
-- `-t, --temperature`: Set response temperature (0.0 to 1.0, default: 1.0)
-- `-d, --dry-run`: Test mode without making API calls
+### CLI Options
+
+The Python CLI supports these options:
+
+- `prompt`: The prompt to send to Claude. If not provided, reads from stdin.
+- `-s, --stream`: Stream the response as it's generated
+- `-t, --temperature`: Temperature for response generation (0.0 to 1.0)
+- `-m, --model`: Claude model to use
+- `-b, --budget`: Thinking budget in tokens (1 to 128000)
+- `-f, --format`: Output format (text or JSON)
+- `-o, --output`: Save response to specified file
+- `--system`: System message to set context for Claude
+- `-d, --dry-run`: Test mode that doesn't make actual API calls
+- `-v, --version`: Show program's version number and exit
 
 ## Implementation Notes
 

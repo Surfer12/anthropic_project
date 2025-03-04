@@ -15,7 +15,7 @@ cat > "$PROJECT_DIR/bin/claudethinkmojo" << 'EOF'
 PROJECT_DIR="/Users/ryanoates/anthropic_project/anthropic_client_mojo"
 cd "$PROJECT_DIR"
 export PIXI_PROJECT_MANIFEST="$PROJECT_DIR/pixi.toml"
-python "$PROJECT_DIR/python_cli.py" "$@"
+magic run python "$PROJECT_DIR/python_cli.py" "$@"
 EOF
 
 # Create claudethinkstream
@@ -26,7 +26,7 @@ cat > "$PROJECT_DIR/bin/claudethinkstream" << 'EOF'
 PROJECT_DIR="/Users/ryanoates/anthropic_project/anthropic_client_mojo"
 cd "$PROJECT_DIR"
 export PIXI_PROJECT_MANIFEST="$PROJECT_DIR/pixi.toml"
-python "$PROJECT_DIR/python_cli.py" -s "$@"
+magic run python "$PROJECT_DIR/python_cli.py" -s "$@"
 EOF
 
 # Create claudethinkfast
@@ -37,7 +37,7 @@ cat > "$PROJECT_DIR/bin/claudethinkfast" << 'EOF'
 PROJECT_DIR="/Users/ryanoates/anthropic_project/anthropic_client_mojo"
 cd "$PROJECT_DIR"
 export PIXI_PROJECT_MANIFEST="$PROJECT_DIR/pixi.toml"
-python "$PROJECT_DIR/python_cli.py" -t 0.3 "$@"
+magic run python "$PROJECT_DIR/python_cli.py" -t 0.3 "$@"
 EOF
 
 # Create claudethinkdry
@@ -48,7 +48,7 @@ cat > "$PROJECT_DIR/bin/claudethinkdry" << 'EOF'
 PROJECT_DIR="/Users/ryanoates/anthropic_project/anthropic_client_mojo"
 cd "$PROJECT_DIR"
 export PIXI_PROJECT_MANIFEST="$PROJECT_DIR/pixi.toml"
-python "$PROJECT_DIR/python_cli.py" -d "$@"
+magic run python "$PROJECT_DIR/python_cli.py" -d "$@"
 EOF
 
 # Create claudethinkjson
@@ -59,7 +59,7 @@ cat > "$PROJECT_DIR/bin/claudethinkjson" << 'EOF'
 PROJECT_DIR="/Users/ryanoates/anthropic_project/anthropic_client_mojo"
 cd "$PROJECT_DIR"
 export PIXI_PROJECT_MANIFEST="$PROJECT_DIR/pixi.toml"
-python "$PROJECT_DIR/python_cli.py" -f json "$@"
+magic run python "$PROJECT_DIR/python_cli.py" -f json "$@"
 EOF
 
 # Create claudethinkhaiku
@@ -70,7 +70,7 @@ cat > "$PROJECT_DIR/bin/claudethinkhaiku" << 'EOF'
 PROJECT_DIR="/Users/ryanoates/anthropic_project/anthropic_client_mojo"
 cd "$PROJECT_DIR"
 export PIXI_PROJECT_MANIFEST="$PROJECT_DIR/pixi.toml"
-python "$PROJECT_DIR/python_cli.py" -m claude-3-5-haiku-20241022 "$@"
+magic run python "$PROJECT_DIR/python_cli.py" -m claude-3-5-haiku-20241022 "$@"
 EOF
 
 # Create claudethinkfile
@@ -89,7 +89,7 @@ fi
 
 output_file="$1"
 shift
-python "$PROJECT_DIR/python_cli.py" -o "$output_file" "$@"
+magic run python "$PROJECT_DIR/python_cli.py" -o "$output_file" "$@"
 EOF
 
 # Make the scripts executable
