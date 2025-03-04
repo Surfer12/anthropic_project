@@ -1,4 +1,4 @@
-# CLAUDE.md - Python Anthropic API Project
+# CLAUDE.md - Python & Mojo Anthropic API Project
 
 ## Build/Test/Lint Commands
 
@@ -6,15 +6,19 @@
 # Install dependencies
 magic install
 
-# Run the application
+# Run the Python application
 magic run python anthropic_client.py
 # or 
 magic run
 
-# Lint with flake8
+# Run the Mojo application
+cd anthropic_client_mojo
+magic run mojo main.mojo
+
+# Lint Python with flake8
 magic run flake8 *.py
 
-# Type check with mypy
+# Type check Python with mypy
 magic run mypy *.py
 
 # Run tests with coverage
@@ -80,6 +84,37 @@ magic run pytest tests/test_environment.py       # Environment tests
 - Environment variables should be loaded from .env using python-dotenv
 - Always handle API exceptions and provide meaningful error messages
 - Document functions with docstrings using Google style
+
+### Mojo
+- Use Mojo 1.0+ syntax (no `let` keyword, use `var` instead)
+- Class names: PascalCase (e.g., `AnthropicClient`)
+- Function/variable names: snake_case (e.g., `get_response()`)
+- Constants: UPPER_SNAKE_CASE (e.g., `MAX_TOKENS`)
+- Import order: standard library, third-party, local application
+- Use proper Python interoperability for API communication
+- Maintain consistent error handling with Python implementation
+- Document functions with docstrings
+- For Python interop, import `PythonObject` from the `python` module
+- Match Mojo implementation closely with Python counterpart for feature parity
+
+### Known Mojo Issues and Workarounds
+
+#### Python Object Attribute Access
+- Use `PythonObject.`.`__getattr__()` method instead of dot notation when accessing attributes that cause linting errors
+- Example: `obj.__getattr__("attribute_name")` instead of `obj.attribute_name`
+- Add comments to indicate why this pattern is being used
+
+#### Memory Management Functions
+- Use explicit ownership transfer with `^` or `.steal()` when appropriate
+- Implement proper cleanup in destructors or with `try`/`finally` blocks
+- Consider using `owned` pointer types for objects that need explicit lifetime management
+- Add todo comments for future refactoring once Mojo's memory management features improve
+
+#### Module Imports
+- Use fully qualified import paths to avoid ambiguity
+- When importing from Python, prefer `from python import Python, PythonObject` pattern
+- For modules that can't be properly imported, create wrapper functions that use Python interop
+- Document import workarounds with comments to revisit in future Mojo versions
 
 ### Error Handling
 - Use specific exception types
