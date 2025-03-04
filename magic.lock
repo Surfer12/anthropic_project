@@ -139,6 +139,7 @@ packages:
   - typing-extensions >=4.7,<5
   - typing_extensions >=4.10,<5
   license: MIT
+  license_family: MIT
   size: 115658
   timestamp: 1740788060869
 - conda: https://conda.anaconda.org/conda-forge/noarch/anyio-4.8.0-pyhd8ed1ab_0.conda
@@ -782,6 +783,8 @@ packages:
   - python >=3.12,<3.13.0a0 *_cpython
   - python_abi 3.12.* *_cp312
   - typing_extensions >=4.1.0
+  arch: arm64
+  platform: osx
   license: MIT
   license_family: MIT
   size: 10149670
