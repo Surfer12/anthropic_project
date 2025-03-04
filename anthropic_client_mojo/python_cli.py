@@ -34,6 +34,12 @@ def run_cli():
         help="Temperature for response generation (0.0 to 1.0)"
     )
     
+    parser.add_argument(
+        "-d", "--dry-run",
+        action="store_true",
+        help="Test mode that doesn't make actual API calls"
+    )
+    
     args = parser.parse_args()
     
     # Get prompt from arguments or stdin
@@ -61,6 +67,17 @@ def run_cli():
         import os
         load_dotenv()
         api_key = os.environ.get("ANTHROPIC_API_KEY")
+        
+        # Dry run mode for testing without API calls
+        if args.dry_run:
+            sys.stdout.write("=== DRY RUN MODE ===\n")
+            sys.stdout.write(f"API Key found: {'Yes' if api_key else 'No'}\n")
+            sys.stdout.write(f"Prompt: {prompt}\n")
+            sys.stdout.write(f"Stream mode: {args.stream}\n")
+            sys.stdout.write(f"Temperature: {args.temperature}\n")
+            sys.stdout.write("Claude: [This is a dry run test response.]\n")
+            return
+            
         if not api_key:
             sys.stderr.write("Error: ANTHROPIC_API_KEY environment variable not set\n")
             sys.exit(1)
@@ -99,11 +116,29 @@ def run_cli():
             response_text = response.content[0].text if response and response.content else "No response"
             sys.stdout.write("Claude: " + response_text + "\n")
             
-    except Exception as e:
-        sys.stderr.write(f"Error: {e}\n")
+    except anthropic.AuthenticationError as e:
+        sys.stderr.write(f"Authentication Error: {e}\n")
+        sys.stderr.write("Please check your ANTHROPIC_API_KEY environment variable.\n")
+        sys.exit(1)
+    except anthropic.APIConnectionError as e:
+        sys.stderr.write(f"API Connection Error: {e}\n")
+        sys.stderr.write("Please check your internet connection and try again.\n")
+        sys.exit(1)
+    except anthropic.RateLimitError as e:
+        sys.stderr.write(f"Rate Limit Error: {e}\n")
+        sys.stderr.write("Please wait a moment and try again.\n")
+        sys.exit(1)
+    except anthropic.BadRequestError as e:
+        sys.stderr.write(f"Bad Request Error: {e}\n")
+        sys.exit(1)
+    except anthropic.APIError as e:
+        sys.stderr.write(f"Anthropic API Error: {e}\n")
         sys.exit(1)
     except KeyboardInterrupt:
         sys.stderr.write("\nOperation cancelled by user\n")
+        sys.exit(1)
+    except Exception as e:
+        sys.stderr.write(f"Unexpected Error: {e}\n")
         sys.exit(1)
 
 if __name__ == "__main__":
