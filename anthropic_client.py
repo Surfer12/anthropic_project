@@ -1,38 +1,48 @@
 import os
+from typing import Optional, Iterator, Union
 import anthropic
 from dotenv import load_dotenv
 
-def get_response():
-    # Load API key from .env file
-    load_dotenv()
-    
-    # Get API key from environment
-    api_key = os.environ.get("ANTHROPIC_API_KEY")
-    if not api_key:
-        raise ValueError("ANTHROPIC_API_KEY environment variable not set")
-    
-    client = anthropic.Anthropic(
-        api_key=api_key
-    )
-
-    message = client.beta.messages.create(
-        model="claude-3-7-sonnet-20250219",
-        max_tokens=128000,
-        temperature=1,
-        messages=[
-            {"role": "user", "content": "Hello, Claude!"}
-        ],
-        thinking={
-            "type": "enabled",
-            "budget_tokens": 64000
-        },
-        betas=["output-128k-2025-02-19"]
-    )
-    return message.content
+class AnthropicClient:
+    def __init__(self):
+        load_dotenv()
+        api_key = os.environ.get("ANTHROPIC_API_KEY")
+        if not api_key:
+            raise ValueError("ANTHROPIC_API_KEY environment variable not set")
+        self.client = anthropic.Anthropic(api_key=api_key)
+        
+    def get_response(self, prompt: str, stream: bool = False, temperature: float = 1.0) -> Union[str, Iterator[str]]:
+        """Get a response from Claude.
+        
+        Args:
+            prompt: The user's prompt to send to Claude
+            stream: Whether to stream the response
+            temperature: Controls randomness in the response (0.0 to 1.0)
+            
+        Returns:
+            Either a complete response string or an iterator of response chunks
+        """
+        message_params = {
+            "model": "claude-3-7-sonnet-20250219",
+            "max_tokens": 128000,
+            "temperature": temperature,
+            "messages": [
+                {"role": "user", "content": prompt}
+            ],
+            "thinking": {
+                "type": "enabled",
+                "budget_tokens": 128000
+            },
+            "betas": ["output-128k-2025-02-19"]
+        }
+        
+        if stream:
+            response = self.client.beta.messages.create(**message_params, stream=True)
+            return (chunk.content[0].text for chunk in response)
+        else:
+            response = self.client.beta.messages.create(**message_params)
+            return response.content[0].text
 
 if __name__ == "__main__":
-    try:
-        response = get_response()
-        print(response)
-    except Exception as e:
-        print(f"Error: {e}")
+    client = AnthropicClient()
+    print(client.get_response("Hello, Claude!"))
