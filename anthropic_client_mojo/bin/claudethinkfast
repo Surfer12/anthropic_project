@@ -1,0 +1,7 @@
+#!/bin/bash
+# claudethinkfast - Send a prompt to Claude with lower temperature
+
+PROJECT_DIR="/Users/ryanoates/anthropic_project/anthropic_client_mojo"
+cd "$PROJECT_DIR"
+export PIXI_PROJECT_MANIFEST="$PROJECT_DIR/pixi.toml"
+python "$PROJECT_DIR/python_cli.py" -t 0.3 "$@"

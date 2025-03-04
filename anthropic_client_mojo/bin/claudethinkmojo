@@ -1,0 +1,7 @@
+#!/bin/bash
+# claudethinkmojo - Send a prompt to Claude with thinking enabled
+
+PROJECT_DIR="/Users/ryanoates/anthropic_project/anthropic_client_mojo"
+cd "$PROJECT_DIR"
+export PIXI_PROJECT_MANIFEST="$PROJECT_DIR/pixi.toml"
+python "$PROJECT_DIR/python_cli.py" "$@"
