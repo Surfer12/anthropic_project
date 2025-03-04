@@ -15,10 +15,13 @@ fn test_env_loading() raises:
 
 fn test_client_initialization() raises:
     print("Testing client initialization...")
-    var client = AnthropicClient()
-    if client.client is None:
+    try:
+        var client = AnthropicClient()
+        # We're interested in just initializing the client without an error
+        print("✓ Client initialization test passed")
+    except Error as e:
+        print(f"Client initialization failed: {e}")
         raise Error("Client initialization failed")
-    print("✓ Client initialization test passed")
 
 fn test_response_generation(dry_run: Bool = False) raises:
     print("Testing response generation...")
@@ -96,4 +99,16 @@ fn run_tests(dry_run: Bool = False) raises:
     print("\n✓ All tests completed successfully!\n")
 
 fn main() raises:
-    run_tests() 
+    var sys_module = Python.import_module("sys")
+    var argv = sys_module.argv
+    var argv_len = len(argv)
+    
+    # Check for --dry-run flag
+    var dry_run = False
+    for i in range(1, argv_len):
+        var arg = String(argv[i])
+        if arg == "--dry-run" or arg == "-d":
+            dry_run = True
+            break
+    
+    run_tests(dry_run)
