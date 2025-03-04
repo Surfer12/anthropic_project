@@ -1,6 +1,10 @@
 import os
 import anthropic
 import sys
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 def get_response():
     client = anthropic.Anthropic(
@@ -10,14 +14,14 @@ def get_response():
 
     with client.beta.messages.stream(
         model="claude-3-7-sonnet-20250219",
-        max_tokens=128000,
+        max_tokens=128000,  # Maximum allowed for claude-3-7-sonnet-20250219
         temperature=1,
         messages=[
             {"role": "user", "content": "Hello, Claude!"}
         ],
         thinking={
             "type": "enabled",
-            "budget_tokens": 128000
+            "budget_tokens": 64000  # Reduced to be less than max_tokens
         },
         betas=["output-128k-2025-02-19"]
     ) as stream:

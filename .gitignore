@@ -1,6 +1,7 @@
-
 # pixi environments
 .pixi
 *.egg-info
 # magic environments
 .magic
+# environment variables
+.env
