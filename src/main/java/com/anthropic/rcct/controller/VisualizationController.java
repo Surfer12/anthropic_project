@@ -13,22 +13,44 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * REST controller for managing the visualization of cognitive chains of thought.
+ * 
+ * This controller provides endpoints for viewing and manipulating thought visualizations,
+ * including creating new thoughts, retrieving existing thoughts, and displaying
+ * visual representations of thought chains.
+ */
 @Controller
 @RequestMapping("/api/visualization")
 public class VisualizationController {
 
     private final ThoughtProcessingService thoughtProcessingService;
     
+    /**
+     * Constructs a new VisualizationController with the specified thought processing service.
+     * 
+     * @param thoughtProcessingService The service to be used for thought processing operations
+     */
     @Autowired
     public VisualizationController(ThoughtProcessingService thoughtProcessingService) {
         this.thoughtProcessingService = thoughtProcessingService;
     }
     
+    /**
+     * Displays the main visualization interface.
+     * 
+     * @return The name of the visualization view template
+     */
     @GetMapping("/")
     public String showVisualization() {
         return "interactive-integration-explorer";
     }
     
+    /**
+     * Retrieves all thoughts for visualization.
+     * 
+     * @return ResponseEntity containing a list of thought data mapped as key-value pairs
+     */
     @GetMapping("/thoughts")
     @ResponseBody
     public ResponseEntity<List<Map<String, Object>>> getThoughts() {
@@ -48,6 +70,12 @@ public class VisualizationController {
         return ResponseEntity.ok(List.of(thoughtMap));
     }
     
+    /**
+     * Creates a new thought and adds it to the visualization.
+     * 
+     * @param thoughtData Map containing the thought data including content, type, depth, and parentId
+     * @return ResponseEntity containing the created thought data
+     */
     @PostMapping("/thoughts")
     @ResponseBody
     public ResponseEntity<Map<String, Object>> createThought(@RequestBody Map<String, Object> thoughtData) {
