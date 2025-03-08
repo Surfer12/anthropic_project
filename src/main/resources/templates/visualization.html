@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>RCCT Visualization</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        #visualization {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: white;
+            margin-bottom: 20px;
+        }
+
+        .node {
+            cursor: pointer;
+        }
+
+        .node circle {
+            stroke: #fff;
+            stroke-width: 2px;
+        }
+
+        .node text {
+            font: 12px sans-serif;
+            fill: #333;
+        }
+
+        .link {
+            fill: none;
+            stroke: #999;
+            stroke-opacity: 0.6;
+            stroke-width: 1.5px;
+        }
+
+        .tooltip {
+            position: absolute;
+            padding: 10px;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            border-radius: 4px;
+            font-size: 12px;
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        #controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            align-items: center;
+        }
+
+        button {
+            padding: 8px 16px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        select {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: white;
+        }
+
+        .legend {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Recursive Cognitive Chain of Thought Visualization</h1>
+        
+        <div id="controls">
+            <button onclick="addThought()">Add Thought</button>
+            <select id="thoughtType">
+                <option value="understanding">Understanding</option>
+                <option value="analysis">Analysis</option>
+                <option value="exploration">Exploration</option>
+                <option value="reflection">Reflection</option>
+                <option value="meta">Meta-Observation</option>
+            </select>
+            <select id="thoughtDepth">
+                <option value="1">Depth 1</option>
+                <option value="2">Depth 2</option>
+                <option value="3">Depth 3</option>
+                <option value="4">Depth 4</option>
+                <option value="5">Depth 5</option>
+            </select>
+            <button onclick="centerGraph()">Center Graph</button>
+            <button onclick="toggleLabels()">Toggle Labels</button>
+        </div>
+
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #4e79a7;"></div>
+                <span>Understanding</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #f28e2c;"></div>
+                <span>Analysis</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #e15759;"></div>
+                <span>Exploration</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #76b7b2;"></div>
+                <span>Reflection</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #59a14f;"></div>
+                <span>Meta-Observation</span>
+            </div>
+        </div>
+        
+        <div id="visualization"></div>
+    </div>
+    
+    <script th:inline="javascript">
+        // Color scale for different thought types
+        const colorScale = {
+            'understanding': '#4e79a7',
+            'analysis': '#f28e2c',
+            'exploration': '#e15759',
+            'reflection': '#76b7b2',
+            'meta': '#59a14f'
+        };
+
+        // D3.js visualization code
+        const width = 1160;
+        const height = 600;
+        let showLabels = true;
+        
+        const svg = d3.select("#visualization")
+            .append("svg")
+            .attr("width", width)
+            .attr("height", height);
+
+        // Add zoom behavior
+        const zoom = d3.zoom()
+            .scaleExtent([0.1, 4])
+            .on("zoom", (event) => {
+                g.attr("transform", event.transform);
+            });
+
+        svg.call(zoom);
+        
+        // Create a container for the graph
+        const g = svg.append("g");
+            
+        const simulation = d3.forceSimulation()
+            .force("link", d3.forceLink().id(d => d.id).distance(100))
+            .force("charge", d3.forceManyBody().strength(-300))
+            .force("center", d3.forceCenter(width / 2, height / 2))
+            .force("collision", d3.forceCollide().radius(30));
+
+        // Create tooltip
+        const tooltip = d3.select("body").append("div")
+            .attr("class", "tooltip")
+            .style("opacity", 0);
+            
+        function updateVisualization(data) {
+            // Convert data format if necessary
+            const nodes = Array.isArray(data.thoughts) ? data.thoughts : [];
+            const links = [];
+            
+            // Create links based on parentId
+            nodes.forEach(node => {
+                if (node.parentId) {
+                    links.push({
+                        source: node.parentId,
+                        target: node.id
+                    });
+                }
+            });
+
+            // Update links
+            const link = g.selectAll(".link")
+                .data(links)
+                .join("line")
+                .attr("class", "link");
+            
+            // Update nodes
+            const node = g.selectAll(".node")
+                .data(nodes)
+                .join("g")
+                .attr("class", "node")
+                .call(d3.drag()
+                    .on("start", dragstarted)
+                    .on("drag", dragged)
+                    .on("end", dragended));
+            
+            // Update circles
+            node.selectAll("circle")
+                .data(d => [d])
+                .join("circle")
+                .attr("r", d => 10 + (d.depth || 1) * 2)
+                .style("fill", d => colorScale[d.type] || "#999")
+                .on("mouseover", showTooltip)
+                .on("mouseout", hideTooltip);
+            
+            // Update labels
+            node.selectAll("text")
+                .data(d => [d])
+                .join("text")
+                .attr("dx", 15)
+                .attr("dy", ".35em")
+                .text(d => d.content)
+                .style("opacity", showLabels ? 1 : 0);
+                
+            simulation
+                .nodes(nodes)
+                .on("tick", ticked);
+                
+            simulation.force("link")
+                .links(links);
+                
+            function ticked() {
+                link
+                    .attr("x1", d => d.source.x)
+                    .attr("y1", d => d.source.y)
+                    .attr("x2", d => d.target.x)
+                    .attr("y2", d => d.target.y);
+                    
+                node
+                    .attr("transform", d => `translate(${d.x},${d.y})`);
+            }
+        }
+        
+        function showTooltip(event, d) {
+            tooltip.transition()
+                .duration(200)
+                .style("opacity", .9);
+            tooltip.html(`
+                <strong>${d.content}</strong><br/>
+                Type: ${d.type}<br/>
+                Depth: ${d.depth}<br/>
+                ID: ${d.id}
+            `)
+                .style("left", (event.pageX + 10) + "px")
+                .style("top", (event.pageY - 28) + "px");
+        }
+        
+        function hideTooltip() {
+            tooltip.transition()
+                .duration(500)
+                .style("opacity", 0);
+        }
+        
+        function dragstarted(event) {
+            if (!event.active) simulation.alphaTarget(0.3).restart();
+            event.subject.fx = event.subject.x;
+            event.subject.fy = event.subject.y;
+        }
+        
+        function dragged(event) {
+            event.subject.fx = event.x;
+            event.subject.fy = event.y;
+        }
+        
+        function dragended(event) {
+            if (!event.active) simulation.alphaTarget(0);
+            event.subject.fx = null;
+            event.subject.fy = null;
+        }
+        
+        function centerGraph() {
+            svg.transition().duration(750).call(
+                zoom.transform,
+                d3.zoomIdentity,
+                d3.zoomTransform(svg.node()).invert([width / 2, height / 2])
+            );
+        }
+        
+        function toggleLabels() {
+            showLabels = !showLabels;
+            g.selectAll(".node text")
+                .transition()
+                .duration(300)
+                .style("opacity", showLabels ? 1 : 0);
+        }
+        
+        function addThought() {
+            const type = document.getElementById("thoughtType").value;
+            const depth = parseInt(document.getElementById("thoughtDepth").value);
+            const thought = {
+                content: "New " + type + " thought",
+                type: type,
+                depth: depth,
+                parentId: null
+            };
+            
+            fetch("/visualize/thought", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(thought)
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Update visualization with new data
+                updateVisualization(data);
+            })
+            .catch(error => {
+                console.error("Error adding thought:", error);
+            });
+        }
+        
+        // Initial load
+        const initialData = /*[[${cctModel}]]*/ {};
+        updateVisualization(initialData);
+    </script>
+</body>
+</html> 

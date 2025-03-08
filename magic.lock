@@ -782,8 +782,6 @@ packages:
   - python >=3.12,<3.13.0a0 *_cpython
   - python_abi 3.12.* *_cp312
   - typing_extensions >=4.1.0
-  arch: arm64
-  platform: osx
   license: MIT
   license_family: MIT
   size: 10149670
