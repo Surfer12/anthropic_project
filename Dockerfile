@@ -1,4 +1,4 @@
-FROM eclipse-temurin:17-jdk AS build
+FROM eclipse-temurin:23-jdk AS build
 
 WORKDIR /app
 
@@ -16,7 +16,7 @@ COPY src ./src
 RUN ./gradlew build --info
 
 # Runtime image
-FROM eclipse-temurin:17-jre
+FROM eclipse-temurin:23-jre
 
 WORKDIR /app
 
