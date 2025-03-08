@@ -20,4 +20,17 @@ dependencies = [
 packages = ["anthropic_client"]
 
 [project.scripts]
-claudethink = "anthropic_client.cli:main" 
+claudethink = "anthropic_client.cli:main"
+
+[tool.pytest.ini_options]
+addopts = "--benchmark-only --benchmark-autosave"
+testpaths = ["tests", "benchmark"]
+
+[tool.black]
+line-length = 88
+target-version = ['py38']
+include = '\.pyi?$'
+
+[tool.isort]
+profile = "black"
+multi_line_output = 3 
