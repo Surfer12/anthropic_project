@@ -1,0 +1,4 @@
+rootProject.name = 'anthropic-project'
+
+// Include any other subprojects if needed
+// include('subproject1', 'subproject2')

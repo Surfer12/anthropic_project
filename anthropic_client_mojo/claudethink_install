@@ -1,120 +1,124 @@
 #!/bin/bash
 # Installation script for Claude CLI tools
 
-# Define the project directory (where your scripts are located)
-PROJECT_DIR="/Users/ryanoates/anthropic_project/anthropic_client_mojo"
+# Define project directory dynamically based on script location
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+PROJECT_ROOT="$( cd "$SCRIPT_DIR/.." && pwd )"
 
-# Create modified scripts with absolute paths
-mkdir -p "$PROJECT_DIR/bin"
+echo "Installing Claude CLI tools from $PROJECT_ROOT"
 
-# Create claudethinkmojo
-cat > "$PROJECT_DIR/bin/claudethinkmojo" << 'EOF'
+# Create bin directory if it doesn't exist
+mkdir -p "$PROJECT_ROOT/bin"
+
+# Create claudethinkmojo (Mojo version)
+cat > "$PROJECT_ROOT/bin/claudethinkmojo" << EOF
 #!/bin/bash
-# claudethinkmojo - Send a prompt to Claude with thinking enabled
+# claudethinkmojo - Send a prompt to Claude with thinking enabled (Mojo version)
 
-PROJECT_DIR="/Users/ryanoates/anthropic_project/anthropic_client_mojo"
-cd "$PROJECT_DIR"
-export PIXI_PROJECT_MANIFEST="$PROJECT_DIR/pixi.toml"
-magic run python "$PROJECT_DIR/python_cli.py" "$@"
+cd "$PROJECT_ROOT"
+export PIXI_PROJECT_MANIFEST="$PROJECT_ROOT/pixi.toml"
+magic run python "$SCRIPT_DIR/python_cli.py" "\$@"
+EOF
+
+# Create claudethink (Python version)
+cat > "$PROJECT_ROOT/bin/claudethink" << EOF
+#!/bin/bash
+# claudethink - Send a prompt to Claude with thinking enabled (Python version)
+
+cd "$PROJECT_ROOT"
+export PIXI_PROJECT_MANIFEST="$PROJECT_ROOT/pixi.toml"
+magic run python -m anthropic_client.cli "\$@"
 EOF
 
 # Create claudethinkstream
-cat > "$PROJECT_DIR/bin/claudethinkstream" << 'EOF'
+cat > "$PROJECT_ROOT/bin/claudethinkstream" << EOF
 #!/bin/bash
 # claudethinkstream - Stream a response from Claude with thinking enabled
 
-PROJECT_DIR="/Users/ryanoates/anthropic_project/anthropic_client_mojo"
-cd "$PROJECT_DIR"
-export PIXI_PROJECT_MANIFEST="$PROJECT_DIR/pixi.toml"
-magic run python "$PROJECT_DIR/python_cli.py" -s "$@"
+cd "$PROJECT_ROOT"
+export PIXI_PROJECT_MANIFEST="$PROJECT_ROOT/pixi.toml"
+magic run python "$SCRIPT_DIR/python_cli.py" -s "\$@"
 EOF
 
 # Create claudethinkfast
-cat > "$PROJECT_DIR/bin/claudethinkfast" << 'EOF'
+cat > "$PROJECT_ROOT/bin/claudethinkfast" << EOF
 #!/bin/bash
 # claudethinkfast - Send a prompt to Claude with lower temperature
 
-PROJECT_DIR="/Users/ryanoates/anthropic_project/anthropic_client_mojo"
-cd "$PROJECT_DIR"
-export PIXI_PROJECT_MANIFEST="$PROJECT_DIR/pixi.toml"
-magic run python "$PROJECT_DIR/python_cli.py" -t 0.3 "$@"
+cd "$PROJECT_ROOT"
+export PIXI_PROJECT_MANIFEST="$PROJECT_ROOT/pixi.toml"
+magic run python "$SCRIPT_DIR/python_cli.py" -t 0.3 "\$@"
 EOF
 
 # Create claudethinkdry
-cat > "$PROJECT_DIR/bin/claudethinkdry" << 'EOF'
+cat > "$PROJECT_ROOT/bin/claudethinkdry" << EOF
 #!/bin/bash
 # claudethinkdry - Test Claude interaction without making API calls
 
-PROJECT_DIR="/Users/ryanoates/anthropic_project/anthropic_client_mojo"
-cd "$PROJECT_DIR"
-export PIXI_PROJECT_MANIFEST="$PROJECT_DIR/pixi.toml"
-magic run python "$PROJECT_DIR/python_cli.py" -d "$@"
+cd "$PROJECT_ROOT"
+export PIXI_PROJECT_MANIFEST="$PROJECT_ROOT/pixi.toml"
+magic run python "$SCRIPT_DIR/python_cli.py" -d "\$@"
 EOF
 
 # Create claudethinkjson
-cat > "$PROJECT_DIR/bin/claudethinkjson" << 'EOF'
+cat > "$PROJECT_ROOT/bin/claudethinkjson" << EOF
 #!/bin/bash
 # claudethinkjson - Get Claude's response in JSON format
 
-PROJECT_DIR="/Users/ryanoates/anthropic_project/anthropic_client_mojo"
-cd "$PROJECT_DIR"
-export PIXI_PROJECT_MANIFEST="$PROJECT_DIR/pixi.toml"
-magic run python "$PROJECT_DIR/python_cli.py" -f json "$@"
+cd "$PROJECT_ROOT"
+export PIXI_PROJECT_MANIFEST="$PROJECT_ROOT/pixi.toml"
+magic run python "$SCRIPT_DIR/python_cli.py" -f json "\$@"
 EOF
 
 # Create claudethinkhaiku
-cat > "$PROJECT_DIR/bin/claudethinkhaiku" << 'EOF'
+cat > "$PROJECT_ROOT/bin/claudethinkhaiku" << EOF
 #!/bin/bash
 # claudethinkhaiku - Use the Claude Haiku model (smaller/faster)
 
-PROJECT_DIR="/Users/ryanoates/anthropic_project/anthropic_client_mojo"
-cd "$PROJECT_DIR"
-export PIXI_PROJECT_MANIFEST="$PROJECT_DIR/pixi.toml"
-magic run python "$PROJECT_DIR/python_cli.py" -m claude-3-5-haiku-20241022 "$@"
+cd "$PROJECT_ROOT"
+export PIXI_PROJECT_MANIFEST="$PROJECT_ROOT/pixi.toml"
+magic run python "$SCRIPT_DIR/python_cli.py" -m claude-3-5-haiku-20241022 "\$@"
 EOF
 
 # Create claudethinkfile
-cat > "$PROJECT_DIR/bin/claudethinkfile" << 'EOF'
+cat > "$PROJECT_ROOT/bin/claudethinkfile" << EOF
 #!/bin/bash
 # claudethinkfile - Save Claude's response to a file
 
-PROJECT_DIR="/Users/ryanoates/anthropic_project/anthropic_client_mojo"
-cd "$PROJECT_DIR"
-export PIXI_PROJECT_MANIFEST="$PROJECT_DIR/pixi.toml"
+cd "$PROJECT_ROOT"
+export PIXI_PROJECT_MANIFEST="$PROJECT_ROOT/pixi.toml"
 
-if [ "$#" -lt 2 ]; then
+if [ "\$#" -lt 2 ]; then
   echo "Usage: claudethinkfile <output_file> <prompt>"
   exit 1
 fi
 
-output_file="$1"
+output_file="\$1"
 shift
-magic run python "$PROJECT_DIR/python_cli.py" -o "$output_file" "$@"
+magic run python "$SCRIPT_DIR/python_cli.py" -o "\$output_file" "\$@"
 EOF
 
 # Make the scripts executable
-chmod +x "$PROJECT_DIR/bin/claudethinkmojo"
-chmod +x "$PROJECT_DIR/bin/claudethinkstream"
-chmod +x "$PROJECT_DIR/bin/claudethinkfast"
-chmod +x "$PROJECT_DIR/bin/claudethinkdry"
-chmod +x "$PROJECT_DIR/bin/claudethinkjson"
-chmod +x "$PROJECT_DIR/bin/claudethinkhaiku"
-chmod +x "$PROJECT_DIR/bin/claudethinkfile"
+chmod +x "$PROJECT_ROOT/bin/"*
 
-echo "Scripts created in $PROJECT_DIR/bin"
+echo "Scripts created in $PROJECT_ROOT/bin"
 echo ""
 echo "To install these scripts to your PATH, run:"
-echo "sudo cp $PROJECT_DIR/bin/* /usr/local/bin/"
+echo "sudo cp $PROJECT_ROOT/bin/* /usr/local/bin/"
 echo ""
 echo "Or create symlinks (recommended):"
-echo "sudo ln -s $PROJECT_DIR/bin/claudethinkmojo /usr/local/bin/claudethinkmojo"
-echo "sudo ln -s $PROJECT_DIR/bin/claudethinkstream /usr/local/bin/claudethinkstream"
-echo "sudo ln -s $PROJECT_DIR/bin/claudethinkfast /usr/local/bin/claudethinkfast"
-echo "sudo ln -s $PROJECT_DIR/bin/claudethinkdry /usr/local/bin/claudethinkdry"
-echo "sudo ln -s $PROJECT_DIR/bin/claudethinkjson /usr/local/bin/claudethinkjson"
-echo "sudo ln -s $PROJECT_DIR/bin/claudethinkhaiku /usr/local/bin/claudethinkhaiku"
-echo "sudo ln -s $PROJECT_DIR/bin/claudethinkfile /usr/local/bin/claudethinkfile"
+for script in "$PROJECT_ROOT"/bin/*; do
+  script_name=$(basename "$script")
+  echo "sudo ln -s $script /usr/local/bin/$script_name"
+done
+
 echo ""
 echo "Or add the bin directory to your PATH in your shell profile (~/.bashrc, ~/.zshrc, etc.):"
-echo "echo 'export PATH=\"$PROJECT_DIR/bin:\$PATH\"' >> ~/.zshrc"
+echo "echo 'export PATH=\"$PROJECT_ROOT/bin:\$PATH\"' >> ~/.zshrc"
 echo "source ~/.zshrc"
+
+# Install Magic dependencies
+echo ""
+echo "Installing Magic dependencies..."
+cd "$PROJECT_ROOT"
+magic install
