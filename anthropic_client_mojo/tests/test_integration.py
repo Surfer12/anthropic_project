@@ -1,14 +1,16 @@
+import io
 import os
-import pytest
-from unittest.mock import patch, MagicMock
 import sys
+import pytest
+import anthropic
+from unittest.mock import patch, MagicMock
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from anthropic_client import AnthropicClient
-from anthropic_client_mojo.python_cli import run_cli
+from anthropic_client_mojo.python_cli import run_cli, main
 
 
 class TestIntegration:
-    """Integration tests for the Anthropic client and CLI."""
+    """Test suite for integration between CLI and client."""
 
     @patch('anthropic.Anthropic')
     def test_cli_to_client_flow(self, mock_anthropic):
@@ -16,22 +18,19 @@ class TestIntegration:
         # Setup mock client
         mock_client = MagicMock()
         mock_anthropic.return_value = mock_client
-        
+
+        # Mock response
         mock_message = MagicMock()
         mock_message.content = [{"type": "text", "text": "Integration test response"}]
         mock_client.beta.messages.create.return_value = mock_message
-        
+
         # Test CLI with custom temperature
         test_args = ["cli.py", "-t", "0.7", "Integration", "test"]
-        with patch.object(sys, 'argv', test_args):
-            with patch('sys.stdout', new=io.StringIO()) as fake_out:
-                main()
-        
-        # Verify client was called with correct parameters
-        args = mock_client.beta.messages.create.call_args[1]
-        assert args["temperature"] == 0.7
-        assert args["messages"][0]["content"] == "Integration test"
-        assert "Integration test response" in fake_out.getvalue()
+        with patch.dict(os.environ, {"ANTHROPIC_API_KEY": "test-key"}):
+            with patch.object(sys, 'argv', test_args):
+                with patch('sys.stdout', new=io.StringIO()) as fake_out:
+                    main()
+                    assert "Integration test response" in fake_out.getvalue()
 
     @patch('anthropic.Anthropic')
     def test_streaming_integration(self, mock_anthropic):

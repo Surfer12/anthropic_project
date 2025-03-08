@@ -107,10 +107,7 @@ def format_response(response: str, format: str = "text") -> str:
         return json.dumps({"response": response}, indent=2)
     return response
 
-def run_cli():
-    parser = create_parser()
-    args = parser.parse_args()
-    
+def run_cli(args):
     # Validate temperature when thinking is enabled
     if args.temperature != 1.0 and args.budget > 0:
         sys.stderr.write("Warning: Temperature must be 1.0 when thinking is enabled. Setting temperature to 1.0.\n")
@@ -256,5 +253,11 @@ def run_cli():
         sys.stderr.write(f"Unexpected Error: {e}\n")
         sys.exit(1)
 
+def main(args=None):
+    """Main entry point for the CLI."""
+    parser = create_parser()
+    args = parser.parse_args(args)
+    return run_cli(args)
+
 if __name__ == "__main__":
-    run_cli()
+    sys.exit(main())

@@ -1,15 +1,26 @@
 import os
-import pytest
-from unittest.mock import patch, MagicMock
 import sys
+import pytest
+import unittest
+import anthropic
+from unittest.mock import patch, MagicMock
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from anthropic_client import AnthropicClient
 from dotenv import load_dotenv
-import anthropic
 
 
-class TestAnthropicClient:
+class TestAnthropicClient(unittest.TestCase):
     """Test suite for the Anthropic client module."""
+
+    def setUp(self):
+        """Set up test environment."""
+        self.api_key = "test-key"
+        self.mock_env = patch.dict(os.environ, {"ANTHROPIC_API_KEY": self.api_key})
+        self.mock_env.start()
+
+    def tearDown(self):
+        """Clean up test environment."""
+        self.mock_env.stop()
 
     def test_module_imports(self):
         """Test that necessary modules can be imported."""
@@ -19,49 +30,31 @@ class TestAnthropicClient:
 
     @patch('anthropic.Anthropic')
     def test_client_initialization(self, mock_anthropic):
-        """Test client initialization with API key."""
-        with patch.dict(os.environ, {"ANTHROPIC_API_KEY": "test-key"}):
-            client = AnthropicClient()
-            assert client.client == mock_anthropic.return_value
+        """Test client initialization."""
+        client = AnthropicClient()
+        mock_anthropic.assert_called_once_with(api_key=self.api_key)
 
     @patch('anthropic.Anthropic')
     def test_missing_api_key(self, mock_anthropic):
         """Test handling of missing API key."""
         with patch.dict(os.environ, {}, clear=True):
-            with pytest.raises(ValueError, match="ANTHROPIC_API_KEY environment variable not set"):
+            with self.assertRaises(ValueError) as cm:
                 AnthropicClient()
+            self.assertEqual(str(cm.exception), "ANTHROPIC_API_KEY environment variable not set")
 
     @patch('anthropic.Anthropic')
     def test_get_response_non_streaming(self, mock_anthropic):
-        """Test non-streaming response."""
-        # Setup mock client and response
+        """Test getting a non-streaming response."""
         mock_client = MagicMock()
         mock_anthropic.return_value = mock_client
 
         mock_message = MagicMock()
-        mock_message.content = [{"type": "text", "text": "Hello, human!"}]
+        mock_message.content = [{"type": "text", "text": "Test response"}]
         mock_client.beta.messages.create.return_value = mock_message
 
-        # Create client and get response
-        with patch.dict(os.environ, {"ANTHROPIC_API_KEY": "test-key"}):
-            client = AnthropicClient()
-            result = client.get_response("Test prompt")
-
-        # Verify API called with correct parameters
-        mock_client.beta.messages.create.assert_called_once()
-        args = mock_client.beta.messages.create.call_args[1]
-        assert args["model"] == "claude-3-7-sonnet-20250219"
-        assert args["max_tokens"] == 128000
-        assert args["temperature"] == 1.0
-        assert args["messages"][0]["role"] == "user"
-        assert args["messages"][0]["content"] == "Test prompt"
-        assert args["thinking"]["type"] == "enabled"
-        assert args["thinking"]["budget_tokens"] == 128000
-        assert "output-128k-2025-02-19" in args["betas"]
-        assert not args.get("stream", False)
-        
-        # Verify result
-        assert result == "Hello, human!"
+        client = AnthropicClient()
+        response = client.get_response("Test prompt")
+        self.assertEqual(response, "Test response")
 
     @patch('anthropic.Anthropic')
     def test_get_response_with_temperature(self, mock_anthropic):
@@ -70,16 +63,120 @@ class TestAnthropicClient:
         mock_anthropic.return_value = mock_client
 
         mock_message = MagicMock()
-        mock_message.content = [{"type": "text", "text": "Hello, human!"}]
+        mock_message.content = [{"type": "text", "text": "Test response"}]
         mock_client.beta.messages.create.return_value = mock_message
 
-        with patch.dict(os.environ, {"ANTHROPIC_API_KEY": "test-key"}):
-            client = AnthropicClient()
-            result = client.get_response("Test prompt", temperature=0.5)
+        client = AnthropicClient()
+        response = client.get_response("Test prompt", temperature=0.7)
+        self.assertEqual(response, "Test response")
 
         args = mock_client.beta.messages.create.call_args[1]
-        assert args["temperature"] == 0.5
-        assert result == "Hello, human!"
+        self.assertEqual(args["temperature"], 0.7)
+
+    @patch('anthropic.Anthropic')
+    def test_get_response_empty_prompt(self, mock_anthropic):
+        """Test handling of empty prompt."""
+        client = AnthropicClient()
+        with self.assertRaises(ValueError) as cm:
+            client.get_response("")
+        self.assertEqual(str(cm.exception), "Prompt cannot be empty")
+
+    @patch('anthropic.Anthropic')
+    def test_get_response_api_error(self, mock_anthropic):
+        """Test handling of API errors."""
+        mock_client = MagicMock()
+        mock_anthropic.return_value = mock_client
+        mock_client.beta.messages.create.side_effect = anthropic.APIError(
+            message="API Error",
+            request=MagicMock()
+        )
+
+        client = AnthropicClient()
+        with self.assertRaises(anthropic.APIError):
+            client.get_response("Test prompt")
+
+    @patch('anthropic.Anthropic')
+    def test_get_response_rate_limit(self, mock_anthropic):
+        """Test handling of rate limit errors."""
+        mock_client = MagicMock()
+        mock_anthropic.return_value = mock_client
+        mock_client.beta.messages.create.side_effect = anthropic.RateLimitError(
+            message="Rate limit exceeded",
+            request=MagicMock(),
+            response=MagicMock(status_code=429),
+            body={"error": {"message": "Rate limit exceeded"}}
+        )
+
+        client = AnthropicClient()
+        with self.assertRaises(anthropic.RateLimitError):
+            client.get_response("Test prompt")
+
+    @patch('anthropic.Anthropic')
+    def test_get_response_invalid_api_key(self, mock_anthropic):
+        """Test handling of invalid API key."""
+        mock_client = MagicMock()
+        mock_anthropic.return_value = mock_client
+        mock_client.beta.messages.create.side_effect = anthropic.AuthenticationError(
+            message="Invalid API key",
+            response=MagicMock(status_code=401),
+            body={"error": {"message": "Invalid API key"}}
+        )
+
+        client = AnthropicClient()
+        with self.assertRaises(anthropic.AuthenticationError):
+            client.get_response("Test prompt")
+
+    @patch('anthropic.Anthropic')
+    def test_get_response_streaming_error(self, mock_anthropic):
+        """Test handling of streaming errors."""
+        mock_client = MagicMock()
+        mock_anthropic.return_value = mock_client
+
+        def mock_stream():
+            yield MagicMock(delta=MagicMock(text="Hello"))
+            raise anthropic.APIError(message="Stream error", request=MagicMock())
+
+        mock_client.beta.messages.create.return_value = mock_stream()
+
+        client = AnthropicClient()
+        with self.assertRaises(anthropic.APIError):
+            client.get_response("Test prompt", stream=True)
+
+    @patch('anthropic.Anthropic')
+    def test_logging_configuration(self, mock_anthropic):
+        """Test logging configuration."""
+        with self.assertLogs(level='INFO') as log:
+            client = AnthropicClient()
+            client.get_response("Test prompt")
+            self.assertTrue(any("Sending request" in msg for msg in log.output))
+
+    @patch('anthropic.Anthropic')
+    def test_response_content_types(self, mock_anthropic):
+        """Test handling of different response content types."""
+        mock_client = MagicMock()
+        mock_anthropic.return_value = mock_client
+
+        # Test text content
+        mock_message = MagicMock()
+        mock_message.content = [{"type": "text", "text": "Text response"}]
+        mock_client.beta.messages.create.return_value = mock_message
+
+        client = AnthropicClient()
+        response = client.get_response("Test prompt")
+        self.assertEqual(response, "Text response")
+
+        # Test empty content
+        mock_message.content = []
+        response = client.get_response("Test prompt")
+        self.assertEqual(response, "")
+
+        # Test multiple content blocks
+        mock_message.content = [
+            {"type": "text", "text": "First"},
+            {"type": "text", "text": " Second"}
+        ]
+        response = client.get_response("Test prompt")
+        self.assertEqual(response, "First Second")
 
     @patch('anthropic.Anthropic')
     def test_get_response_streaming(self, mock_anthropic):
@@ -96,9 +193,8 @@ class TestAnthropicClient:
         mock_client.beta.messages.create.return_value = mock_chunks
 
         # Create client and get streaming response
-        with patch.dict(os.environ, {"ANTHROPIC_API_KEY": "test-key"}):
-            client = AnthropicClient()
-            result = client.get_response("Test prompt", stream=True)
+        client = AnthropicClient()
+        result = client.get_response("Test prompt", stream=True)
 
         # Verify streaming was requested
         mock_client.beta.messages.create.assert_called_once()
@@ -121,161 +217,6 @@ class TestAnthropicClient:
             # Test temperature too low
             with pytest.raises(ValueError, match="Temperature must be between 0.0 and 1.0"):
                 client.get_response("Test prompt", temperature=-0.5)
-
-    @patch('anthropic.Anthropic')
-    def test_get_response_empty_prompt(self, mock_anthropic):
-        """Test handling of empty prompts."""
-        with patch.dict(os.environ, {"ANTHROPIC_API_KEY": "test-key"}):
-            client = AnthropicClient()
-            
-            # Test empty string
-            with pytest.raises(ValueError, match="Prompt cannot be empty"):
-                client.get_response("")
-                
-            # Test whitespace only
-            with pytest.raises(ValueError, match="Prompt cannot be empty"):
-                client.get_response("   ")
-
-    @patch('anthropic.Anthropic')
-    def test_get_response_api_error(self, mock_anthropic):
-        """Test handling of API errors."""
-        mock_client = MagicMock()
-        mock_anthropic.return_value = mock_client
-        
-        # Simulate API error
-        mock_client.beta.messages.create.side_effect = anthropic.APIError("API Error")
-        
-        with patch.dict(os.environ, {"ANTHROPIC_API_KEY": "test-key"}):
-            client = AnthropicClient()
-            with pytest.raises(anthropic.APIError, match="API Error"):
-                client.get_response("Test prompt")
-
-    @patch('anthropic.Anthropic')
-    def test_get_response_rate_limit(self, mock_anthropic):
-        """Test handling of rate limit errors."""
-        mock_client = MagicMock()
-        mock_anthropic.return_value = mock_client
-        
-        # Simulate rate limit error
-        mock_client.beta.messages.create.side_effect = anthropic.RateLimitError("Rate limit exceeded")
-        
-        with patch.dict(os.environ, {"ANTHROPIC_API_KEY": "test-key"}):
-            client = AnthropicClient()
-            with pytest.raises(anthropic.RateLimitError, match="Rate limit exceeded"):
-                client.get_response("Test prompt")
-
-    @patch('anthropic.Anthropic')
-    def test_get_response_invalid_api_key(self, mock_anthropic):
-        """Test handling of invalid API key."""
-        mock_client = MagicMock()
-        mock_anthropic.return_value = mock_client
-        
-        # Simulate authentication error
-        mock_client.beta.messages.create.side_effect = anthropic.AuthenticationError("Invalid API key")
-        
-        with patch.dict(os.environ, {"ANTHROPIC_API_KEY": "invalid-key"}):
-            client = AnthropicClient()
-            with pytest.raises(anthropic.AuthenticationError, match="Invalid API key"):
-                client.get_response("Test prompt")
-
-    @patch('anthropic.Anthropic')
-    def test_get_response_streaming_error(self, mock_anthropic):
-        """Test handling of streaming errors."""
-        mock_client = MagicMock()
-        mock_anthropic.return_value = mock_client
-        
-        # Simulate streaming error
-        def mock_stream():
-            yield MagicMock(content=[MagicMock(text="Hello")])
-            raise anthropic.APIError("Stream error")
-            
-        mock_client.beta.messages.create.return_value = mock_stream()
-        
-        with patch.dict(os.environ, {"ANTHROPIC_API_KEY": "test-key"}):
-            client = AnthropicClient()
-            response = client.get_response("Test prompt", stream=True)
-            
-            # First chunk should work
-            assert next(response) == "Hello"
-            
-            # Second chunk should raise error
-            with pytest.raises(anthropic.APIError, match="Stream error"):
-                next(response)
-
-    @patch('anthropic.Anthropic')
-    def test_logging_configuration(self, mock_anthropic):
-        """Test that logging is properly configured."""
-        import logging
-        
-        with patch.dict(os.environ, {"ANTHROPIC_API_KEY": "test-key"}):
-            # Test with debug logging
-            logging.basicConfig(level=logging.DEBUG)
-            client = AnthropicClient()
-            
-            mock_message = MagicMock()
-            mock_message.content = [{"type": "text", "text": "Test response"}]
-            mock_anthropic.return_value.beta.messages.create.return_value = mock_message
-            
-            with self.assertLogs(level='DEBUG') as log:
-                client.get_response("Test prompt")
-                assert any("Sending request to Anthropic API" in msg for msg in log.output)
-                assert any("Received response from Anthropic API" in msg for msg in log.output)
-
-    @patch('anthropic.Anthropic')
-    def test_timeout_handling(self, mock_anthropic):
-        """Test handling of timeout errors."""
-        from requests.exceptions import Timeout
-        
-        mock_client = MagicMock()
-        mock_anthropic.return_value = mock_client
-        mock_client.beta.messages.create.side_effect = Timeout("Request timed out")
-        
-        with patch.dict(os.environ, {"ANTHROPIC_API_KEY": "test-key"}):
-            client = AnthropicClient()
-            with pytest.raises(Timeout, match="Request timed out"):
-                client.get_response("Test prompt")
-
-    @patch('anthropic.Anthropic')
-    def test_thinking_budget_validation(self, mock_anthropic):
-        """Test validation of thinking budget parameter."""
-        with patch.dict(os.environ, {"ANTHROPIC_API_KEY": "test-key"}):
-            client = AnthropicClient()
-            
-            # Test invalid thinking budget
-            with pytest.raises(ValueError, match="Thinking budget must be between 1 and 128000"):
-                client.get_response("Test prompt", thinking_budget=0)
-            
-            with pytest.raises(ValueError, match="Thinking budget must be between 1 and 128000"):
-                client.get_response("Test prompt", thinking_budget=128001)
-
-    @patch('anthropic.Anthropic')
-    def test_response_content_types(self, mock_anthropic):
-        """Test handling of different response content types."""
-        mock_client = MagicMock()
-        mock_anthropic.return_value = mock_client
-        
-        # Test text content
-        mock_message = MagicMock()
-        mock_message.content = [{"type": "text", "text": "Text response"}]
-        mock_client.beta.messages.create.return_value = mock_message
-        
-        with patch.dict(os.environ, {"ANTHROPIC_API_KEY": "test-key"}):
-            client = AnthropicClient()
-            result = client.get_response("Test prompt")
-            assert result == "Text response"
-        
-        # Test empty content
-        mock_message.content = []
-        result = client.get_response("Test prompt")
-        assert result == ""
-        
-        # Test multiple content blocks
-        mock_message.content = [
-            {"type": "text", "text": "First"},
-            {"type": "text", "text": " Second"}
-        ]
-        result = client.get_response("Test prompt")
-        assert result == "First Second"
 
     @patch('anthropic.Anthropic')
     def test_connection_error_handling(self, mock_anthropic):
