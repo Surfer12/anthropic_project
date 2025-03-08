@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.ArrayList;
 
 /**
  * Service class responsible for processing and managing thoughts within the CCT (Cognitive Chain of Thought) system.
@@ -20,9 +19,8 @@ import java.util.ArrayList;
 @Transactional
 public class ThoughtProcessingService {
     
-    private CCTModel cctModel;
+    private final CCTModel cctModel;
     
-
     /**
      * Constructs a new ThoughtProcessingService with the specified CCT model.
      * 
