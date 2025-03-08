@@ -7,6 +7,8 @@ import jakarta.persistence.Id;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * Represents a single thought or node within a Cognitive Chain of Thought (CCT) model.
@@ -21,6 +23,8 @@ import lombok.AllArgsConstructor;
  */
 @Entity
 @Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class ThoughtNode {
