@@ -10,9 +10,10 @@ This project provides a Python client and CLI for interacting with Anthropic's C
   - Temperature control for response randomness (0.0 to 1.0)
   - Streaming support for real-time responses
   - Comprehensive error handling and retries
-- **Multiple Interfaces**:
+- **Multiple Implementations**:
   - Python library for programmatic usage
   - Command-line interface (CLI) for direct interaction
+  - Mojo implementation for better performance
 - **Developer Friendly**:
   - Type hints for better IDE support
   - Comprehensive error handling
@@ -24,32 +25,56 @@ This project provides a Python client and CLI for interacting with Anthropic's C
 
 ```
 anthropic_client/
-├── anthropic_client/
+├── anthropic_client/       # Python implementation
 │   ├── __init__.py
-│   ├── client.py    # Core client implementation
-│   └── cli.py       # Command-line interface
-├── tests/
-│   └── test_*.py    # Test files
+│   ├── client.py           # Core client implementation
+│   └── cli.py              # Command-line interface
+├── anthropic_client_mojo/  # Mojo implementation
+│   ├── __init__.py
+│   ├── client.mojo         # Mojo client
+│   ├── cli.mojo            # Mojo CLI
+│   └── python_cli.py       # Python-to-Mojo bridge
+├── bin/                    # CLI executables (after installation)
+├── tests/                  # Test files
 ├── README.md
-├── setup.py         # Package configuration
-└── requirements.txt # Development dependencies
+├── pixi.toml               # Magic/Pixi package configuration
+├── magic.lock              # Magic lock file
+└── setup.py                # Python package configuration
 ```
 
 ## Installation
 
-### Using Magic (Recommended)
+### Using Magic Toolchain (Recommended)
 
-1. Install dependencies using Magic (from Modular):
+The project uses Modular's Magic toolchain for dependency management and running both Python and Mojo code.
+
+1. **Install Magic** (if not already installed):
+   ```bash
+   curl https://get.modular.com | sh
+   ```
+
+2. **Clone this repository**:
+   ```bash
+   git clone https://github.com/yourusername/anthropic_client.git
+   cd anthropic_client
+   ```
+
+3. **Install dependencies with Magic**:
    ```bash
    magic install
    ```
 
-2. Install the package in development mode:
+4. **Install the package in development mode**:
    ```bash
-   magic run pip install -e .
+   magic run pixi task dev-install
    ```
 
-### Using pip
+5. **Install the CLI tools**:
+   ```bash
+   magic run pixi task install-cli
+   ```
+
+### Using pip (Python-only features)
 
 ```bash
 pip install .
@@ -89,23 +114,26 @@ focused_response = client.get_response("Solve this math problem", temperature=0.
 The CLI supports both direct prompts and stdin input:
 
 ```bash
-# Direct prompt
+# Direct prompt with Python implementation
 claudethink "What is the capital of France?"
 
+# Direct prompt with Mojo implementation (better performance)
+claudethinkmojo "What is the capital of France?"
+
 # Stream the response
-claudethink -s "Tell me a story"
+claudethinkstream "Tell me a story"
 
 # Control temperature
-claudethink -t 0.2 "Solve this math problem"
+claudethinkfast "Solve this math problem"
 
 # Use a specific model
 claudethink -m claude-3-opus-20240229 "Complex analysis task"
 
 # Save response to file
-claudethink -o response.txt "Generate a report"
+claudethinkfile response.txt "Generate a report"
 
 # Output in JSON format
-claudethink -f json "What's the weather?"
+claudethinkjson "What's the weather?"
 
 # Set system message for context
 claudethink --system "You are a helpful coding assistant" "Help me with Python"
@@ -140,15 +168,49 @@ Available Models:
 - claude-3-sonnet-20240229
 - claude-3-haiku-20240307
 
-## Development
+## Development with Magic
 
-### Testing
+The Magic toolchain enables a unified development experience for both Python and Mojo code. The project includes predefined tasks you can run with Magic:
+
+```bash
+# Install dependencies
+magic install
+
+# Run tests
+magic run pixi task test
+
+# Run Mojo-specific tests
+magic run pixi task mojo-test
+
+# Run linting
+magic run pixi task lint
+
+# Run type checking
+magic run pixi task typecheck
+
+# Format code
+magic run pixi task format
+
+# Build documentation
+magic run pixi task docs-build
+
+# Serve documentation locally
+magic run pixi task docs
+
+# Build the Python package
+magic run pixi task build
+
+# Build the Mojo binary
+magic run pixi task mojo-build
+```
+
+## Testing
 
 The project includes a comprehensive test suite covering all major functionality:
 
 ```bash
 # Run all tests
-magic run pytest
+magic run pixi task test
 
 # Run tests with coverage report
 magic run pytest --cov=anthropic_client tests/
@@ -200,9 +262,9 @@ The client handles various error scenarios:
 3. Make your changes
 4. Ensure all tests pass:
    ```bash
-   magic run pytest
-   magic run flake8
-   magic run mypy .
+   magic run pixi task test
+   magic run pixi task lint
+   magic run pixi task typecheck
    ```
 5. Submit a pull request
 
