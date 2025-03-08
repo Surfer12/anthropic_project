@@ -1,300 +1,187 @@
-# Anthropic API Client
+# RCCT: Recursive Chain-of-Thought Processing Framework
 
-This project provides a Python client and CLI for interacting with Anthropic's Claude models, specifically optimized for Claude 3.7 Sonnet.
+RCCT (Recursive Chain-of-Thought) is a Java-based framework that implements advanced recursive thought processing with interactive visualization capabilities. The project demonstrates how computational models can implement cognitive structures through hierarchical thought representation, meta-cognition, and cross-domain integration.
 
-## Features
+![RCCT Visualization](https://via.placeholder.com/800x400?text=RCCT+Visualization)
 
-- **Advanced Model Support**: Uses Claude 3.7 Sonnet model with 128k context window
-- **Enhanced Capabilities**:
-  - Thinking capability enabled with 128k token budget
-  - Temperature control for response randomness (0.0 to 1.0)
-  - Streaming support for real-time responses
-  - Comprehensive error handling and retries
-- **Multiple Implementations**:
-  - Python library for programmatic usage
-  - Command-line interface (CLI) for direct interaction
-  - Mojo implementation for better performance
-- **Developer Friendly**:
-  - Type hints for better IDE support
-  - Comprehensive error handling
-  - Environment-based configuration
-  - Extensive test coverage
-  - Detailed logging
+## 🎯 Project Goals
 
-## Project Structure
+The RCCT project aims to achieve several ambitious goals:
 
-```
-anthropic_client/
-├── anthropic_client/       # Python implementation
-│   ├── __init__.py
-│   ├── client.py           # Core client implementation
-│   └── cli.py              # Command-line interface
-├── anthropic_client_mojo/  # Mojo implementation
-│   ├── __init__.py
-│   ├── client.mojo         # Mojo client
-│   ├── cli.mojo            # Mojo CLI
-│   └── python_cli.py       # Python-to-Mojo bridge
-├── bin/                    # CLI executables (after installation)
-├── tests/                  # Test files
-├── README.md
-├── pixi.toml               # Magic/Pixi package configuration
-├── magic.lock              # Magic lock file
-└── setup.py                # Python package configuration
-```
+### Core Goals
 
-## Installation
+1. **Recursive Thought Processing**
+   - Implement computational models of recursive thought chains
+   - Support thoughts about thoughts (meta-cognitive reflection)
+   - Enable deep hierarchical thought structures with efficient traversal
+   - Employ memoization to avoid redundant computation
 
-### Using Magic Toolchain (Recommended)
+2. **Cross-Domain Integration**
+   - Bridge computational implementation with cognitive science models
+   - Connect formal data structures with knowledge representation
+   - Enable translation between different thought representation formats
+   - Demonstrate isomorphisms between computational, cognitive, and representational domains
 
-The project uses Modular's Magic toolchain for dependency management and running both Python and Mojo code.
+3. **Interactive Visualization**
+   - Provide intuitive visual exploration of complex thought structures
+   - Support real-time manipulation of thought hierarchies
+   - Offer multiple visualization perspectives (overview, recursive, cross-domain)
+   - Make abstract thought relationships tangible and explorable
 
-1. **Install Magic** (if not already installed):
-   ```bash
-   curl https://get.modular.com | sh
-   ```
+4. **Knowledge Representation**
+   - Formalize thought structures in multiple formats (Java objects, YAML, code)
+   - Support self-reference and aliasing in thought networks
+   - Enable rich metadata attachment for enhanced processing
+   - Create a clean, intuitive API for thought manipulation
 
-2. **Clone this repository**:
-   ```bash
-   git clone https://github.com/yourusername/anthropic_client.git
-   cd anthropic_client
-   ```
+## 🚀 Getting Started
 
-3. **Install dependencies with Magic**:
-   ```bash
-   magic install
-   ```
+### Prerequisites
 
-4. **Install the package in development mode**:
-   ```bash
-   magic run pixi task dev-install
-   ```
+- Java 17 or higher
+- Gradle 7.6+ (or use the included Gradle wrapper)
+- Docker and Docker Compose (for containerized deployment)
 
-5. **Install the CLI tools**:
-   ```bash
-   magic run pixi task install-cli
-   ```
-
-### Using pip (Python-only features)
+### Quick Start
 
 ```bash
-pip install .
+# Clone the repository
+git clone https://github.com/your-username/rcct.git
+cd rcct
+
+# Build and run with Gradle
+./gradlew bootRun
+
+# Alternatively, run with Docker
+docker-compose up -d
 ```
 
-### Environment Setup
+Once running, access the application at:
+- **Web Interface**: http://localhost:8080/api/visualization/
+- **API**: http://localhost:8080/api/visualization/thoughts
+- **H2 Console** (for development): http://localhost:8080/h2-console
+  - JDBC URL: `jdbc:h2:mem:rcctdb`
+  - Username: `sa`
+  - Password: `password`
 
-Create a `.env` file with your Anthropic API key:
-```bash
-echo "ANTHROPIC_API_KEY=your_api_key_here" > .env
-```
+## 🏗️ Architecture
 
-## Usage
+RCCT follows a layered architecture with clean separation of concerns:
 
-### Python Library
+### 1. Data Layer
+- Entity models with JPA annotations
+- H2 in-memory database (configurable for other databases)
+- Repository interfaces for data access
 
-```python
-from anthropic_client import AnthropicClient
+### 2. Service Layer
+- Business logic for thought processing
+- Recursive evaluation algorithms
+- Memoization implementation
+- Cross-domain mapping utilities
 
-# Initialize the client
-client = AnthropicClient()
+### 3. API Layer
+- RESTful endpoints for data access
+- Thymeleaf templates for server-side rendering
+- JSON serialization for programmatic access
 
-# Get a complete response
-response = client.get_response("Hello, Claude!")
-print(response)
+### 4. Visualization Layer
+- Interactive web interface with SVG visualization
+- Dynamic tree structure rendering
+- Multiple visualization perspectives
 
-# Stream a response
-for chunk in client.get_response("Tell me a story", stream=True):
-    print(chunk, end="", flush=True)
+## 🧠 Key Concepts
 
-# Control response randomness
-focused_response = client.get_response("Solve this math problem", temperature=0.2)
-```
+### Thought Nodes
+The fundamental units of the RCCT system are `ThoughtNode` objects, which represent discrete cognitive elements. Each node has:
+- **Content**: The core thought content
+- **Type**: Categorization (e.g., "concept", "question", "insight")
+- **Depth**: Position in the recursive hierarchy
+- **Parent**: Reference to the containing thought (if any)
+- **Metadata**: Additional contextual information
 
-### Command Line Interface
+### Recursive Processing
+RCCT implements true recursive processing with:
+- Self-referential thought structures
+- Deep hierarchical traversal
+- Memoization to avoid redundant computation
+- Meta-cognitive reflection capabilities
 
-The CLI supports both direct prompts and stdin input:
+### Integration Framework
+The system provides integration across three domains:
+- **Computational**: Java/Spring implementation
+- **Cognitive**: Neural/cognitive process modeling
+- **Representational**: YAML and other formal notations
 
-```bash
-# Direct prompt with Python implementation
-claudethink "What is the capital of France?"
+## 🔧 Technologies
 
-# Direct prompt with Mojo implementation (better performance)
-claudethinkmojo "What is the capital of France?"
+RCCT leverages several modern technologies:
 
-# Stream the response
-claudethinkstream "Tell me a story"
+- **Java 17**: For core implementation
+- **Spring Boot 3.2.3**: Application framework
+- **Spring Data JPA**: Database interaction
+- **Jakarta Persistence**: Entity modeling
+- **Lombok**: Boilerplate reduction
+- **Thymeleaf**: Server-side templates
+- **H2 Database**: In-memory data storage
+- **Docker**: Containerization
+- **SVG/JavaScript**: Visualization
 
-# Control temperature
-claudethinkfast "Solve this math problem"
+## 📦 Docker Deployment
 
-# Use a specific model
-claudethink -m claude-3-opus-20240229 "Complex analysis task"
-
-# Save response to file
-claudethinkfile response.txt "Generate a report"
-
-# Output in JSON format
-claudethinkjson "What's the weather?"
-
-# Set system message for context
-claudethink --system "You are a helpful coding assistant" "Help me with Python"
-
-# Control thinking budget
-claudethink -b 64000 "Summarize this text"
-
-# Read prompt from stdin
-echo "What is the meaning of life?" | claudethink
-
-# Interactive mode (press Ctrl+D to submit)
-claudethink
-
-# Check version
-claudethink -v
-```
-
-CLI Options:
-- `-s, --stream`: Stream the response in real-time
-- `-t, --temperature`: Set response temperature (0.0 to 1.0, default: 1.0)
-- `-m, --model`: Choose Claude model (default: claude-3-7-sonnet-20250219)
-- `-b, --budget`: Set thinking budget in tokens (1 to 128000, default: 120000)
-- `-f, --format`: Output format (text or JSON, default: text)
-- `-o, --output`: Save response to specified file
-- `--system`: Set system message for context
-- `-d, --dry-run`: Test mode without making API calls
-- `-v, --version`: Show version information
-
-Available Models:
-- claude-3-7-sonnet-20250219 (default)
-- claude-3-opus-20240229
-- claude-3-sonnet-20240229
-- claude-3-haiku-20240307
-
-## Development with Magic
-
-The Magic toolchain enables a unified development experience for both Python and Mojo code. The project includes predefined tasks you can run with Magic:
+For easy deployment, RCCT provides Docker support:
 
 ```bash
-# Install dependencies
-magic install
+# Build and start containers
+docker-compose up -d
 
-# Run tests
-magic run pixi task test
+# View logs
+docker-compose logs -f
 
-# Run Mojo-specific tests
-magic run pixi task mojo-test
-
-# Run linting
-magic run pixi task lint
-
-# Run type checking
-magic run pixi task typecheck
-
-# Format code
-magic run pixi task format
-
-# Build documentation
-magic run pixi task docs-build
-
-# Serve documentation locally
-magic run pixi task docs
-
-# Build the Python package
-magic run pixi task build
-
-# Build the Mojo binary
-magic run pixi task mojo-build
+# Stop containers
+docker-compose down
 ```
 
-## Testing
+The Docker setup includes:
+- Multi-stage build for efficient image size
+- Health checks for reliability
+- Environment-specific configuration
+- Exposed ports for easy access
 
-The project includes a comprehensive test suite covering all major functionality:
+## 📚 Resources
 
-```bash
-# Run all tests
-magic run pixi task test
+### Project Files
 
-# Run tests with coverage report
-magic run pytest --cov=anthropic_client tests/
+- `/src/main/java/com/anthropic/rcct/model/`: Data model classes
+- `/src/main/java/com/anthropic/rcct/service/`: Business logic services
+- `/src/main/java/com/anthropic/rcct/controller/`: API endpoints
+- `/src/main/resources/templates/`: HTML templates
+- `/src/main/resources/application.properties`: Configuration
 
-# Run specific test categories
-magic run pytest tests/test_anthropic_client.py  # Core client tests
-magic run pytest tests/test_cli.py               # CLI tests
-magic run pytest tests/test_integration.py       # Integration tests
-magic run pytest tests/test_environment.py       # Environment setup tests
-```
+### External Resources
 
-### Test Coverage
+- [Spring Boot Documentation](https://docs.spring.io/spring-boot/docs/current/reference/html/)
+- [Jakarta Persistence Documentation](https://jakarta.ee/specifications/persistence/)
+- [Thymeleaf Documentation](https://www.thymeleaf.org/documentation.html)
+- [Docker Documentation](https://docs.docker.com/)
 
-The test suite includes:
-- Unit tests for core functionality
-- Integration tests with the Anthropic API
-- CLI command testing
-- Error handling and edge cases
-- Environment configuration testing
-- Streaming response testing
-- Mock tests for API interactions
+## 🤝 Contributing
 
-### Error Handling
-
-The client handles various error scenarios:
-
-1. **API Errors**:
-   - Authentication failures
-   - Rate limiting
-   - Invalid requests
-   - Network timeouts
-   - Streaming errors
-
-2. **Configuration Errors**:
-   - Missing API keys
-   - Invalid environment setup
-   - Invalid parameter values
-
-3. **Runtime Errors**:
-   - Connection issues
-   - Timeout handling
-   - Stream interruptions
-   - Resource cleanup
-
-## Contributing
+Contributions are welcome! Please feel free to submit a Pull Request.
 
 1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Ensure all tests pass:
-   ```bash
-   magic run pixi task test
-   magic run pixi task lint
-   magic run pixi task typecheck
-   ```
-5. Submit a pull request
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
-## Logging
-
-The client includes detailed logging for debugging and monitoring:
-
-```python
-import logging
-
-# Enable debug logging
-logging.basicConfig(level=logging.DEBUG)
-
-client = AnthropicClient()
-```
-
-Log levels:
-- DEBUG: API request/response details
-- INFO: General operation information
-- WARNING: Non-critical issues
-- ERROR: Critical failures
-
-## Security
-
-- API keys are loaded from environment variables only
-- Sensitive data is never logged
-- All network requests use HTTPS
-- Rate limiting is respected
-- Proper error handling prevents data leaks
-
-## License
+## 📄 License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
+
+## 🔮 Future Work
+
+- Implement more sophisticated recursive evaluation strategies
+- Add natural language processing capabilities
+- Develop graph-based visualization alternatives
+- Create integrations with external cognitive models
+- Implement distributed processing for large thought networks
