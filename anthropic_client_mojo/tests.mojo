@@ -28,8 +28,7 @@ fn test_client_initialization(dry_run: Bool = False) raises:
         return
         
     try:
-        var client = AnthropicClient()
-        # We're interested in just initializing the client without an error
+        AnthropicClient()
         print("✓ Client initialization test passed")
     except:
         print("Client initialization failed")

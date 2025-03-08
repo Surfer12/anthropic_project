@@ -126,15 +126,12 @@ struct AnthropicClient:
         self.client = anthropic.Anthropic(api_key=api_key)
     
     fn get_response(self, prompt: String, stream: Bool = False, temperature: Float64 = 1.0) raises -> PythonObject:
-        """Get a response from Claude with performance metrics.
-        
+        """
+        The prompt to send to Claude.
         Args:
-            prompt: The user's prompt to send to Claude
-            stream: Whether to stream the response
-            temperature: Controls randomness in the response (0.0 to 1.0)
-            
-        Returns:
-            Either a complete response string or an iterator of response chunks
+            prompt: The text prompt to send to Claude.
+            stream: Whether to stream the response.
+            temperature: Controls randomness in the response (0-1).
         """
         # Input validation with early returns
         if temperature < 0.0 or temperature > 1.0:

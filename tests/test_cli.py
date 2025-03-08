@@ -2,7 +2,7 @@ import pytest
 from unittest.mock import patch, MagicMock
 import sys
 import io
-from cli import create_parser, main
+from cli import create_parser, main, run_cli
 
 def test_parser_creation():
     """Test that argument parser is created correctly."""
