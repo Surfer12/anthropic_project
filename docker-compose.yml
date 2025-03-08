@@ -9,6 +9,9 @@ services:
       - "8080:8080"
     environment:
       - SPRING_PROFILES_ACTIVE=docker
+      - MAGIC_PATH=/usr/local/bin
+    volumes:
+      - ./.magic:/app/.magic
     networks:
       - rcct-network
     healthcheck:

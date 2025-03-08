@@ -11,7 +11,7 @@ run = "python anthropic_client.py"
 install-cli = "bash anthropic_client_mojo/claudethink_install"
 test = "pytest tests/"
 build = "python setup.py build"
-dev-install = "pip install -e ."
+osx-arm64-install = "pip install -e ."
 
 # Documentation commands
 docs = "mkdocs serve"
@@ -34,10 +34,14 @@ flake8 = ">=7.1.2,<8"
 mypy = ">=1.15.0,<2"
 pytest = ">=8.3.5,<9"
 pip = ">=25.0.1,<26"
-black = ">=24.2.0,<25"
-mkdocs = ">=1.5.3,<2"
-pytest-cov = ">=4.1.0,<5"
+black = ">=25.1.0,<26"
+mkdocs = ">=1.6.1,<2"
+pytest-cov = ">=6.0.0,<7"
 
-[target.dev.dependencies]
+# For dev dependencies that aren't platform-specific
+[tool.pytest.dependencies]
 pytest = ">=8.3.5,<9"
-black = ">=24.2.0,<25"
+
+# For platform-specific dependencies
+[target.osx-arm64.dependencies]
+# Your Mac-specific dependencies here
