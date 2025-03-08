@@ -3,14 +3,17 @@ FROM eclipse-temurin:17-jdk AS build
 WORKDIR /app
 
 # Copy the gradle files first for better caching
-COPY build.gradle settings.gradle ./
+COPY build.gradle settings.gradle gradlew ./
 COPY gradle ./gradle
+
+# Make gradlew executable
+RUN chmod +x ./gradlew
 
 # Copy the source code
 COPY src ./src
 
 # Build the application
-RUN ./gradlew build -x test
+RUN ./gradlew build --info
 
 # Runtime image
 FROM eclipse-temurin:17-jre
