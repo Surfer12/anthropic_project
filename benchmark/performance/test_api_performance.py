@@ -2,12 +2,11 @@
 
 import pytest
 from anthropic import Anthropic
-from anthropic_client.cli import create_client
 
 @pytest.fixture
 def client():
     """Create an Anthropic client for testing."""
-    return create_client()
+    return Anthropic()  # Configure as needed
 
 def test_client_initialization(benchmark):
     """Benchmark client initialization time."""

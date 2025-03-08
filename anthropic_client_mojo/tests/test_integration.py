@@ -4,7 +4,7 @@ from unittest.mock import patch, MagicMock
 import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from anthropic_client import AnthropicClient
-from cli import main
+from anthropic_client_mojo.python_cli import run_cli
 
 
 class TestIntegration:
