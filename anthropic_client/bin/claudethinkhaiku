@@ -1,0 +1,4 @@
+#\!/bin/bash
+# Use the Claude Haiku model
+cd /Users/ryanoates/anthropic_project/
+python -m anthropic_client.cli -m claude-3-5-haiku-20241022 "$@"

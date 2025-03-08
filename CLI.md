@@ -55,19 +55,28 @@ cat prompt.txt | claudethink
 claudethink [OPTIONS] [PROMPT]
 
 Options:
-  -s, --stream       Stream the response in real-time
+  -ns, --no-stream   Disable streaming (streaming enabled by default)
   -t, --temperature  Set response temperature (0.0 to 1.0, default: 1.0)
-  -b, --budget      Set thinking budget in tokens (1 to 128000, default: 128000)
-  -h, --help        Show this help message
-  -v, --version     Show version information
+  -b, --budget       Set thinking budget in tokens (1 to 128000, default: 128000)
+  -m, --model        Set model name (default: claude-3-5-sonnet-20240620)
+  -h, --help         Show this help message
+  -v, --version      Show version information
 ```
 
 ### Response Control
 
 #### Streaming Mode
-Enable real-time streaming of responses:
+Responses are streamed by default. Disable streaming with:
 ```bash
-claudethink -s "Tell me a story"
+claudethink -ns "Tell me a story"
+claudethink --no-stream "Tell me a story"
+```
+
+#### Model Selection
+Choose a specific Claude model:
+```bash
+claudethink -m claude-3-5-haiku-20241022 "Quick question"
+claudethink --model claude-3-7-sonnet-20250219 "Complex analysis"
 ```
 
 #### Temperature Control
@@ -106,7 +115,7 @@ CLAUDE_THINKING_BUDGET=64000
 ### Basic Examples
 
 ```bash
-# Simple question
+# Simple question (with default streaming)
 claudethink "What is the capital of France?"
 
 # Multi-line input
@@ -115,11 +124,17 @@ def hello():
     print('Hello, World!')
 "
 
-# Stream a long response
-claudethink -s "Write a short story about a robot"
+# Disable streaming
+claudethink -ns "Write a short story about a robot"
+
+# Use Haiku model for faster responses
+claudethink -m claude-3-5-haiku-20241022 "Quick fact check"
 
 # Technical analysis with low temperature
 claudethink -t 0.2 "Explain how TCP/IP works"
+
+# With citations enabled (default)
+claudethink "Explain quantum computing"
 ```
 
 ### Advanced Usage
@@ -133,8 +148,11 @@ cat prompts.txt | while read prompt; do
     claudethink "$prompt" >> responses.txt
 done
 
-# Interactive session with streaming
-claudethink -s
+# Interactive session (with default streaming)
+claudethink
+
+# Use specific script for Haiku model
+claudethinkhaiku "What's the fastest mammal?"
 ```
 
 ## Error Handling
@@ -167,10 +185,10 @@ Error: API request failed: rate limit exceeded
    - Increase budget for complex analysis
    - Monitor token usage in responses
 
-3. **Leverage Streaming**
-   - Enable streaming for long responses
-   - Use streaming for interactive applications
-   - Consider disabling for scripted usage
+3. **Streaming Options**
+   - Streaming is on by default for real-time responses
+   - Disable streaming (-ns flag) for scripted usage
+   - Use specialized scripts (claudethinkhaiku, etc.) for specific models
 
 4. **Input Handling**
    - Use quotes for prompts with spaces

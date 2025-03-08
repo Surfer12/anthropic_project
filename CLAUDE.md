@@ -15,6 +15,12 @@ magic run
 cd anthropic_client_mojo
 magic run mojo main.mojo
 
+# Run with specific model
+magic run python -m anthropic_client.cli -m claude-3-5-haiku-20241022
+
+# Run with no streaming (streaming is default)
+magic run python -m anthropic_client.cli -ns
+
 # Lint Python with flake8
 magic run flake8 *.py
 

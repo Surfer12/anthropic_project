@@ -24,9 +24,9 @@ fn create_parser() raises -> PythonObject:
     )
     
     parser.add_argument(
-        "-s", "--stream",
+        "-ns", "--no-stream",
         action="store_true",
-        help="Stream the response as it's generated"
+        help="Disable streaming (get complete response at once)"
     )
     
     parser.add_argument(
@@ -34,6 +34,28 @@ fn create_parser() raises -> PythonObject:
         type=Python.evaluate("float"),
         default=1.0,
         help="Temperature for response generation (0.0 to 1.0)"
+    )
+    
+    parser.add_argument(
+        "-m", "--model",
+        type=Python.evaluate("str"),
+        default="claude-3-7-sonnet-20250219",
+        choices=Python.evaluate('["claude-3-7-sonnet-20250219", "claude-3-5-haiku-20241022", "claude-3-opus-20240229"]'),
+        help="Model to use for response generation"
+    )
+    
+    parser.add_argument(
+        "-f", "--format",
+        type=Python.evaluate("str"),
+        choices=Python.evaluate('["text", "json", "markdown"]'),
+        default="text",
+        help="Format for the response output"
+    )
+    
+    parser.add_argument(
+        "--system",
+        type=Python.evaluate("str"),
+        help="System prompt to set context/permissions"
     )
     
     return parser
@@ -76,7 +98,7 @@ fn main() raises:
     
     # Create a wrapper for the client interaction
     var runner = Python.evaluate("""
-    def run_client(prompt_text, stream_mode, temperature_value):
+    def run_client(prompt_text, no_stream_mode, temperature_value, model_name, format_type, system_prompt):
         import sys
         import time
         import anthropic
@@ -94,17 +116,34 @@ fn main() raises:
             # Create Anthropic client directly
             client = anthropic.Anthropic(api_key=api_key)
             
+            # Build messages array
+            messages = [{"role": "user", "content": prompt_text}]
+            if system_prompt:
+                messages.insert(0, {"role": "system", "content": system_prompt})
+            
             # Parameters common to both streaming and non-streaming
             params = {
-                "model": "claude-3-7-sonnet-20250219",
+                "model": model_name,
                 "max_tokens": 128000,
-                "messages": [{"role": "user", "content": prompt_text}],
+                "messages": messages,
                 "temperature": float(temperature_value),
                 "thinking": {"type": "enabled", "budget_tokens": 120000},
-                "betas": ["output-128k-2025-02-19"]
+                "betas": ["output-128k-2025-02-19"],
+                "citations": {"enabled": True}
             }
             
-            if stream_mode:
+            # Add format-specific parameters
+            if format_type == "json":
+                params["response_format"] = {"type": "json_object"}
+            
+            if no_stream_mode:
+                # Non-streaming mode
+                response = client.beta.messages.create(**params)
+                response_text = response.content[0].text if response and response.content else "No response"
+                sys.stdout.write("Claude: " + response_text + "\\n")
+                return True
+            else:
+                # Streaming mode (default)
                 sys.stdout.write("Claude: ")
                 sys.stdout.flush()
                 
@@ -121,11 +160,6 @@ fn main() raises:
                 
                 sys.stdout.write("\\n")  # Final newline
                 return True
-            else:
-                response = client.beta.messages.create(**params)
-                response_text = response.content[0].text if response and response.content else "No response"
-                sys.stdout.write("Claude: " + response_text + "\\n")
-                return True
                 
         except Exception as e:
             sys.stderr.write(f"Error: {e}\\n")
@@ -135,7 +169,14 @@ fn main() raises:
     """)
     
     try:
-        var success = runner(prompt, args.stream, args.temperature)
+        var success = runner(
+            prompt, 
+            args.__getattr__("no_stream"), 
+            args.temperature, 
+            args.model, 
+            args.format, 
+            args.system
+        )
         
         if not success:
             sys_module.exit(1)

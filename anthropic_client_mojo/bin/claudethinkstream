@@ -1,7 +1,8 @@
 #!/bin/bash
-# claudethinkstream - Stream a response from Claude with thinking enabled
+# claudethinkstream - Stream a response from Claude (default behavior)
+# Note: This script is maintained for backward compatibility, as streaming is now the default
 
 PROJECT_DIR="/Users/ryanoates/anthropic_project/anthropic_client_mojo"
 cd "$PROJECT_DIR"
 export PIXI_PROJECT_MANIFEST="$PROJECT_DIR/pixi.toml"
-magic run python "$PROJECT_DIR/python_cli.py" -s "$@"
+magic run python "$PROJECT_DIR/python_cli.py" "$@"

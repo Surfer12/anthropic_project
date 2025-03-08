@@ -120,11 +120,16 @@ def run_cli():
     if args.prompt and len(args.prompt) > 0:
         prompt = ' '.join(args.prompt)
     else:
-        sys.stderr.write("Enter your prompt (Ctrl+D to submit):\n")
+        sys.stderr.write("Enter your prompt (press Enter twice to submit):\n")
         sys.stderr.flush()
         try:
-            stdin_read = sys.stdin.read()
-            prompt = stdin_read.strip()
+            lines = []
+            while True:
+                line = sys.stdin.readline()
+                if line.strip() == "" and lines and lines[-1].strip() == "":
+                    break
+                lines.append(line)
+            prompt = ''.join(lines).strip()
             if not prompt:
                 sys.stderr.write("Error: No prompt provided\n")
                 sys.exit(1)

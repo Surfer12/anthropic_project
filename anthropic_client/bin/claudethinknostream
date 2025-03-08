@@ -1,0 +1,4 @@
+#!/bin/bash
+# Use Claude with streaming disabled
+cd /Users/ryanoates/anthropic_project/
+python -m anthropic_client.cli -ns "$@"
