@@ -1,0 +1,26 @@
+{
+  "name": "anthropic_project",
+  "version": "1.0.0",
+  "description": "RCCT (Recursive Chain-of-Thought) is a Java-based framework that implements advanced recursive thought processing with interactive visualization capabilities. The project demonstrates how computational models can implement cognitive structures through hierarchical thought representation, meta-cognition, and cross-domain integration.",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Surfer12/anthropic_project.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Surfer12/anthropic_project/issues"
+  },
+  "homepage": "https://github.com/Surfer12/anthropic_project#readme",
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.39.0"
+  }
+}
