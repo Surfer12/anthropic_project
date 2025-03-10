@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recursive CCT Integration Explorer</title>
+    <style>
+        :root {
+            --bg-color: #0d1117;
+            --text-color: #c9d1d9;
+            --border-color: #30363d;
+            --highlight-color: #58a6ff;
+            --node-bg: #161b22;
+            --node-active: #1f6feb;
+            --line-color: #8b949e;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            line-height: 1.5;
+        }
+        
+        h1, h2, h3 {
+            color: var(--text-color);
+        }
+        
+        .container {
+            display: flex;
+            flex-direction: column;
+            max-width: 1200px;
+            margin: 0 auto;
+            gap: 20px;
+        }
+        
+        .visualization-container {
+            display: flex;
+            flex-direction: row;
+            gap: 20px;
+        }
+        
+        .thought-tree {
+            flex: 1;
+            padding: 20px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            overflow: auto;
+            max-height: 600px;
+            background-color: var(--node-bg);
+        }
+        
+        .visualization-panel {
+            flex: 2;
+            padding: 20px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            background-color: var(--node-bg);
+            min-height: 600px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .details-panel {
+            padding: 20px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            background-color: var(--node-bg);
+            margin-top: 20px;
+        }
+        
+        .node {
+            cursor: pointer;
+            padding: 5px 10px;
+            margin: 5px 0;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+        
+        .node:hover {
+            background-color: rgba(56, 139, 253, 0.15);
+        }
+        
+        .node.active {
+            background-color: var(--node-active);
+            color: white;
+        }
+        
+        .children {
+            margin-left: 20px;
+            border-left: 1px solid var(--line-color);
+            padding-left: 10px;
+        }
+        
+        .svg-container {
+            flex: 1;
+            overflow: auto;
+            background-color: var(--node-bg);
+            border-radius: 4px;
+            text-align: center;
+        }
+        
+        svg {
+            max-width: 100%;
+            max-height: 100%;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        
+        button {
+            background-color: #21262d;
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 5px 10px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        button:hover {
+            background-color: #30363d;
+        }
+        
+        button.active {
+            background-color: var(--node-active);
+            color: white;
+        }
+        
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 10px;
+        }
+        
+        .tab {
+            padding: 8px 16px;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+        }
+        
+        .tab.active {
+            color: var(--highlight-color);
+            border-bottom: 2px solid var(--highlight-color);
+        }
+        
+        pre {
+            background-color: #161b22;
+            padding: 10px;
+            border-radius: 6px;
+            overflow: auto;
+        }
+        
+        code {
+            font-family: SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.9em;
+        }
+        
+        .tooltip {
+            position: absolute;
+            background-color: rgba(22, 27, 34, 0.9);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 5px 10px;
+            font-size: 0.9em;
+            max-width: 300px;
+            z-index: 100;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Recursive CCT Integration Explorer</h1>
+        
+        <div class="visualization-container">
+            <div class="thought-tree">
+                <h3>CCT Thought Structure</h3>
+                <div id="thought-tree"></div>
+            </div>
+            
+            <div class="visualization-panel">
+                <div class="controls">
+                    <button id="btn-overview" class="active">Overview</button>
+                    <button id="btn-recursive">Recursive Structure</button>
+                    <button id="btn-cross-domain">Cross-Domain Integration</button>
+                </div>
+                
+                <div class="svg-container" id="visualization">
+                    <!-- SVG visualizations will be loaded here -->
+                </div>
+            </div>
+        </div>
+        
+        <div class="details-panel">
+            <div class="tabs">
+                <div class="tab active" data-tab="details">Details</div>
+                <div class="tab" data-tab="yaml">YAML</div>
+                <div class="tab" data-tab="code">Code</div>
+            </div>
+            
+            <div class="tab-content" id="details-content">
+                <h3>Component Details</h3>
+                <p>Select a component from the thought structure or visualization to see details.</p>
+            </div>
+            
+            <div class="tab-content" id="yaml-content" style="display: none;">
+                <h3>YAML Structure</h3>
+                <pre><code id="yaml-code">
+# Click on a thought node to see its YAML representation
+                </code></pre>
+            </div>
+            
+            <div class="tab-content" id="code-content" style="display: none;">
+                <h3>Generated Code</h3>
+                <pre><code id="generated-code">
+// Click on a thought node to see its code representation
+                </code></pre>
+            </div>
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        // Fetch thoughts from the API
+        async function fetchThoughts() {
+            try {
+                const response = await fetch('/api/visualization/thoughts');
+                if (!response.ok) {
+                    throw new Error('Failed to fetch thoughts');
+                }
+                return await response.json();
+            } catch (error) {
+                console.error('Error fetching thoughts:', error);
+                return [];
+            }
+        }
+        
+        // Sample data representing the CCT structure
+        const cctThoughtTree = {
+            id: 1,
+            text: "Recursive CCT Integration",
+            children: [
+                {
+                    id: 2,
+                    text: "Core Model Components",
+                    children: [
+                        { id: 7, text: "ThoughtNode Structure" },
+                        { id: 8, text: "Insight Generation" },
+                        { id: 9, text: "Memoization" }
+                    ]
+                },
+                {
+                    id: 3,
+                    text: "Cross-Domain Integration",
+                    children: [
+                        { id: 10, text: "YAML Representation" },
+                        { id: 11, text: "Spring Boot Integration" },
+                        { id: 12, text: "Visualization Engine" }
+                    ]
+                },
+                {
+                    id: 4,
+                    text: "Recursive Processing",
+                    children: [
+                        { id: 13, text: "Thought Aliasing" },
+                        { id: 14, text: "Recursive Evaluation" },
+                        { id: 15, text: "Meta-Reflection Layer" }
+                    ]
+                },
+                {
+                    id: 5,
+                    text: "Visualization Techniques",
+                    children: [
+                        { id: 16, text: "Interactive Explorer" },
+                        { id: 17, text: "SVG Rendering" },
+                        { id: 18, text: "Real-time Updates" }
+                    ]
+                },
+                {
+                    id: 6,
+                    text: "Documentation & Examples",
+                    children: [
+                        { id: 19, text: "Example Use Cases" },
+                        { id: 20, text: "API Documentation" },
+                        { id: 21, text: "Integration Tutorials" }
+                    ]
+                }
+            ]
+        };
+
+        // Sample detailed descriptions
+        const nodeDetails = {
+            1: {
+                description: "A comprehensive framework for recursive thought processing, featuring cross-domain integration and visualization capabilities.",
+                yaml: `cct_integration:
+  name: "Recursive CCT Integration"
+  version: 1.0.0
+  components:
+    - core_model
+    - cross_domain_integration
+    - recursive_processing
+    - visualization_techniques
+    - documentation`,
+                code: `public class RCCTIntegration {
+    private final CoreModel coreModel;
+    private final CrossDomainIntegration crossDomainIntegration;
+    private final RecursiveProcessor recursiveProcessor;
+    private final VisualizationEngine visualizationEngine;
+    
+    public RCCTIntegration() {
+        this.coreModel = new CoreModel();
+        this.crossDomainIntegration = new CrossDomainIntegration();
+        this.recursiveProcessor = new RecursiveProcessor(coreModel);
+        this.visualizationEngine = new VisualizationEngine();
+    }
+    
+    // Methods that integrate these components
+}`
+            },
+            7: {
+                description: "The fundamental data structure for representing thoughts in the CCT model. Supports hierarchy, aliasing, and metadata.",
+                yaml: `thought_node:
+  properties:
+    - id: Integer
+    - content: String
+    - type: String
+    - depth: Integer
+    - parentId: Long (optional)
+    - metadata: Map<String, Object> (optional)`,
+                code: `public class ThoughtNode {
+    private final Long id;
+    private String content;
+    private String type;
+    private Integer depth;
+    private Long parentId;
+    private String metadata;
+    
+    public ThoughtNode() {
+        // Default constructor
+    }
+    
+    // Getters and setters
+}`
+            }
+        };
+
+        // Function to render the thought tree
+        function renderThoughtTree(node, parentElement) {
+            const nodeElement = document.createElement('div');
+            nodeElement.className = 'node';
+            nodeElement.textContent = node.text;
+            nodeElement.dataset.id = node.id;
+            nodeElement.addEventListener('click', function(e) {
+                e.stopPropagation();
+                
+                // Remove active class from all nodes
+                document.querySelectorAll('.node').forEach(n => n.classList.remove('active'));
+                
+                // Add active class to this node
+                this.classList.add('active');
+                
+                // Show details for this node
+                showNodeDetails(node.id);
+            });
+            
+            parentElement.appendChild(nodeElement);
+            
+            if (node.children && node.children.length > 0) {
+                const childrenContainer = document.createElement('div');
+                childrenContainer.className = 'children';
+                parentElement.appendChild(childrenContainer);
+                
+                node.children.forEach(child => {
+                    renderThoughtTree(child, childrenContainer);
+                });
+            }
+        }
+
+        // Function to show node details
+        function showNodeDetails(nodeId) {
+            const details = nodeDetails[nodeId] || {
+                description: "No detailed information available for this component.",
+                yaml: "# No YAML representation available",
+                code: "// No code representation available"
+            };
+            
+            document.getElementById('details-content').innerHTML = `
+                <h3>Component Details</h3>
+                <p>${details.description}</p>
+            `;
+            
+            document.getElementById('yaml-code').textContent = details.yaml;
+            document.getElementById('generated-code').textContent = details.code;
+        }
+        
+        // Function to create the overview visualization
+        function createOverviewVisualization() {
+            const width = 800;
+            const height = 500;
+            const centerX = width / 2;
+            const centerY = height / 2;
+            const mainRadius = 80;
+            const subRadius = 60;
+            const distance = 200;
+            
+            const svgContent = `
+                <svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Central node -->
+                    <circle cx="${centerX}" cy="${centerY}" r="${mainRadius}" fill="#1f6feb" data-node-id="1" />
+                    <text x="${centerX}" y="${centerY}" text-anchor="middle" dominant-baseline="middle" fill="white" data-node-id="1">Recursive CCT Integration</text>
+                    
+                    <!-- Component nodes -->
+                    <g data-node-id="2">
+                        <circle cx="${centerX - distance}" cy="${centerY - distance/2}" r="${subRadius}" fill="#238636" />
+                        <text x="${centerX - distance}" y="${centerY - distance/2}" text-anchor="middle" dominant-baseline="middle" fill="white">Core Model Components</text>
+                        <line x1="${centerX - distance/2}" y1="${centerY - distance/4}" x2="${centerX - 5 - mainRadius}" y2="${centerY - 5}" stroke="#8b949e" stroke-width="2" />
+                    </g>
+                    
+                    <g data-node-id="3">
+                        <circle cx="${centerX + distance}" cy="${centerY - distance/2}" r="${subRadius}" fill="#a371f7" />
+                        <text x="${centerX + distance}" y="${centerY - distance/2}" text-anchor="middle" dominant-baseline="middle" fill="white">Cross-Domain Integration</text>
+                        <line x1="${centerX + distance/2}" y1="${centerY - distance/4}" x2="${centerX + 5 + mainRadius}" y2="${centerY - 5}" stroke="#8b949e" stroke-width="2" />
+                    </g>
+                    
+                    <g data-node-id="4">
+                        <circle cx="${centerX - distance}" cy="${centerY + distance/2}" r="${subRadius}" fill="#f85149" />
+                        <text x="${centerX - distance}" y="${centerY + distance/2}" text-anchor="middle" dominant-baseline="middle" fill="white">Recursive Processing</text>
+                        <line x1="${centerX - distance/2}" y1="${centerY + distance/4}" x2="${centerX - 5 - mainRadius}" y2="${centerY + 5}" stroke="#8b949e" stroke-width="2" />
+                    </g>
+                    
+                    <g data-node-id="5">
+                        <circle cx="${centerX + distance}" cy="${centerY + distance/2}" r="${subRadius}" fill="#f0883e" />
+                        <text x="${centerX + distance}" y="${centerY + distance/2}" text-anchor="middle" dominant-baseline="middle" fill="white">Visualization Techniques</text>
+                        <line x1="${centerX + distance/2}" y1="${centerY + distance/4}" x2="${centerX + 5 + mainRadius}" y2="${centerY + 5}" stroke="#8b949e" stroke-width="2" />
+                    </g>
+                </svg>
+            `;
+            
+            document.getElementById('visualization').innerHTML = svgContent;
+            
+            // Add event listeners to SVG elements
+            setTimeout(() => {
+                document.querySelectorAll('#visualization svg g, #visualization svg circle, #visualization svg text')
+                    .forEach(element => {
+                        element.style.cursor = 'pointer';
+                        element.addEventListener('click', function() {
+                            const nodeId = this.getAttribute('data-node-id') || 
+                                         this.parentElement.getAttribute('data-node-id');
+                            if (nodeId) {
+                                // Remove active class from all nodes in tree
+                                document.querySelectorAll('.node').forEach(n => n.classList.remove('active'));
+                                
+                                // Add active class to corresponding node in tree
+                                const treeNode = document.querySelector(`.node[data-id="${nodeId}"]`);
+                                if (treeNode) treeNode.classList.add('active');
+                                
+                                showNodeDetails(parseInt(nodeId));
+                            }
+                        });
+                    });
+            }, 100);
+        }
+        
+        // Function to load visualization types
+        function loadVisualization(type) {
+            if (type === 'overview') {
+                createOverviewVisualization();
+            } else {
+                document.getElementById('visualization').innerHTML = `
+                    <div style="text-align: center; padding: 50px;">
+                        <h3>${type === 'recursive' ? 'Recursive Structure' : 'Cross-Domain Integration'} Visualization</h3>
+                        <p>This visualization would be dynamically loaded based on the selected type.</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Tab switching functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    // Remove active class from all tabs
+                    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                    
+                    // Add active class to clicked tab
+                    this.classList.add('active');
+                    
+                    // Hide all tab content
+                    document.querySelectorAll('.tab-content').forEach(content => {
+                        content.style.display = 'none';
+                    });
+                    
+                    // Show content for active tab
+                    const tabName = this.getAttribute('data-tab');
+                    document.getElementById(`${tabName}-content`).style.display = 'block';
+                });
+            });
+            
+            // Visualization control buttons
+            document.getElementById('btn-overview').addEventListener('click', function() {
+                document.querySelectorAll('.controls button').forEach(btn => btn.classList.remove('active'));
+                this.classList.add('active');
+                loadVisualization('overview');
+            });
+            
+            document.getElementById('btn-recursive').addEventListener('click', function() {
+                document.querySelectorAll('.controls button').forEach(btn => btn.classList.remove('active'));
+                this.classList.add('active');
+                loadVisualization('recursive');
+            });
+            
+            document.getElementById('btn-cross-domain').addEventListener('click', function() {
+                document.querySelectorAll('.controls button').forEach(btn => btn.classList.remove('active'));
+                this.classList.add('active');
+                loadVisualization('cross-domain');
+            });
+            
+            // Initialize the application
+            renderThoughtTree(cctThoughtTree, document.getElementById('thought-tree'));
+            loadVisualization('overview');
+            showNodeDetails(1);
+            
+            // Fetch and use real data
+            fetchThoughts().then(thoughts => {
+                console.log('Fetched thoughts:', thoughts);
+                // Would update the visualization with real data
+            });
+        });
+        /*]]>*/
+    </script>
+</body>
+</html>
