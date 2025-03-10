@@ -1,0 +1,40 @@
+Build Failure Debug Plan:
+
+1. Identify Core Error
+   - Main error: "invalid source release: 23"
+   - Task failed: ':compileJava'
+
+2. Check Java Version Configuration
+   - Current toolchain shows Temurin JDK 17
+   - Source compatibility appears to be set to Java 23 (invalid)
+   - Need to verify build.gradle Java version settings
+
+3. Verify Gradle Configuration
+   - Gradle version: 8.13
+   - Spring Boot version: 3.2.3
+   - Check if versions are compatible
+
+4. Recommended Actions
+   a. Update build.gradle:
+      - Set sourceCompatibility to a valid Java version (8-21)
+      - Set targetCompatibility to match
+   
+   b. Verify JDK Installation:
+      - Confirm Temurin JDK 17 is properly installed
+      - Check JAVA_HOME environment variable
+
+   c. Optional Gradle Fixes:
+      - Run with --stacktrace for more details
+      - Try with --debug for verbose output
+      - Consider running with --scan
+
+5. Additional Notes
+   - Build cache location: /Users/ryanoates/.gradle/caches/build-cache-1
+   - Using Spring Boot with dependency management
+   - Gradle deprecation warnings present (relevant for future updates)
+
+Next Steps:
+1. Check build.gradle Java version settings first
+2. Adjust to compatible Java version
+3. Clean and rebuild project
+4. If issues persist, run with --stacktrace for more details

@@ -1,3 +1,10 @@
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        maven { url 'https://repo.spring.io/milestone' }
+    }
+}
+
 rootProject.name = 'anthropic-project'
 
 // Include any other subprojects if needed
