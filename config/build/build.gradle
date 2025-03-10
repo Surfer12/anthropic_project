@@ -1,4 +1,3 @@
-rootProject.projectDir = file(/Users/ryanoates/anthropic_project)
 
 buildscript {
     repositories {
