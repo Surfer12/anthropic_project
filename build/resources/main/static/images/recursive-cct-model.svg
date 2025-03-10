@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600">
+  <!-- Background -->
+  <rect width="800" height="600" fill="#f8f9fa" />
+  
+  <!-- Main CCT Model Structure -->
+  <rect x="50" y="50" width="700" height="500" rx="10" ry="10" fill="#e9ecef" stroke="#343a40" stroke-width="2" />
+  <text x="400" y="30" font-family="Arial" font-size="22" text-anchor="middle" fill="#343a40">Recursive Chain of Thought (CCT) Model</text>
+  
+  <!-- ThoughtNode Structures -->
+  <rect x="100" y="100" width="200" height="160" rx="5" ry="5" fill="#fff" stroke="#6c757d" stroke-width="2" />
+  <text x="200" y="125" font-family="Arial" font-size="16" text-anchor="middle" fill="#343a40">ThoughtNode 1</text>
+  <text x="200" y="150" font-family="Arial" font-size="14" text-anchor="middle" fill="#6c757d">id: 1</text>
+  <text x="200" y="175" font-family="Arial" font-size="14" text-anchor="middle" fill="#6c757d">"Understanding Phase"</text>
+  <text x="200" y="200" font-family="Arial" font-size="14" text-anchor="middle" fill="#6c757d">subThoughts: [ ]</text>
+  <text x="200" y="225" font-family="Arial" font-size="14" text-anchor="middle" fill="#6c757d">aliasNode: none</text>
+  
+  <rect x="500" y="100" width="200" height="160" rx="5" ry="5" fill="#fff" stroke="#6c757d" stroke-width="2" />
+  <text x="600" y="125" font-family="Arial" font-size="16" text-anchor="middle" fill="#343a40">ThoughtNode 2</text>
+  <text x="600" y="150" font-family="Arial" font-size="14" text-anchor="middle" fill="#6c757d">id: 2</text>
+  <text x="600" y="175" font-family="Arial" font-size="14" text-anchor="middle" fill="#6c757d">"Analysis Phase"</text>
+  <text x="600" y="200" font-family="Arial" font-size="14" text-anchor="middle" fill="#6c757d">subThoughts: [ ]</text>
+  <text x="600" y="225" font-family="Arial" font-size="14" text-anchor="middle" fill="#6c757d">aliasNode: none</text>
+  
+  <rect x="100" y="320" width="200" height="180" rx="5" ry="5" fill="#fff" stroke="#6c757d" stroke-width="2" />
+  <text x="200" y="345" font-family="Arial" font-size="16" text-anchor="middle" fill="#343a40">ThoughtNode 3</text>
+  <text x="200" y="370" font-family="Arial" font-size="14" text-anchor="middle" fill="#6c757d">id: 3</text>
+  <text x="200" y="395" font-family="Arial" font-size="14" text-anchor="middle" fill="#6c757d">"Exploration Phase"</text>
+  <text x="200" y="420" font-family="Arial" font-size="14" text-anchor="middle" fill="#6c757d">subThoughts: [ ]</text>
+  <text x="200" y="445" font-family="Arial" font-size="14" text-anchor="middle" fill="#6c757d">aliasNode: → Node 1</text>
+  
+  <rect x="500" y="320" width="200" height="180" rx="5" ry="5" fill="#fff" stroke="#6c757d" stroke-width="2" />
+  <text x="600" y="345" font-family="Arial" font-size="16" text-anchor="middle" fill="#343a40">ThoughtNode 4</text>
+  <text x="600" y="370" font-family="Arial" font-size="14" text-anchor="middle" fill="#6c757d">id: 4</text>
+  <text x="600" y="395" font-family="Arial" font-size="14" text-anchor="middle" fill="#6c757d">"Reflection Phase"</text>
+  <text x="600" y="420" font-family="Arial" font-size="14" text-anchor="middle" fill="#6c757d">subThoughts: [Node 1, Node 2]</text>
+  <text x="600" y="445" font-family="Arial" font-size="14" text-anchor="middle" fill="#6c757d">aliasNode: none</text>
+  
+  <!-- Connection Lines -->
+  <!-- Alias reference from Node 3 to Node 1 -->
+  <path d="M 200 440 C 150 280 150 180 180 170" stroke="#dc3545" stroke-width="2" fill="none" stroke-dasharray="5,5" />
+  <circle cx="180" cy="170" r="5" fill="#dc3545" />
+  <text x="130" y="300" font-family="Arial" font-size="14" text-anchor="middle" fill="#dc3545" transform="rotate(-90 130,300)">alias reference</text>
+  
+  <!-- Sub-thought references from Node 4 to Node 1 -->
+  <path d="M 500 410 C 400 380 300 300 220 170" stroke="#007bff" stroke-width="2" fill="none" />
+  <circle cx="220" cy="170" r="5" fill="#007bff" />
+  <text x="350" y="320" font-family="Arial" font-size="14" text-anchor="middle" fill="#007bff">sub-thought reference</text>
+  
+  <!-- Sub-thought references from Node 4 to Node 2 -->
+  <path d="M 500 410 C 450 380 500 300 580 170" stroke="#007bff" stroke-width="2" fill="none" />
+  <circle cx="580" cy="170" r="5" fill="#007bff" />
+
+  <!-- Memoization Cache -->
+  <rect x="300" y="500" width="200" height="30" rx="5" ry="5" fill="#6610f2" stroke="#343a40" stroke-width="2" />
+  <text x="400" y="520" font-family="Arial" font-size="14" text-anchor="middle" fill="#fff">Memoization Cache</text>
+  <path d="M 200 280 C 250 300 350 450 350 495" stroke="#6610f2" stroke-width="1" fill="none" stroke-dasharray="3,3" />
+  <path d="M 600 280 C 550 300 450 450 450 495" stroke="#6610f2" stroke-width="1" fill="none" stroke-dasharray="3,3" />
+</svg>

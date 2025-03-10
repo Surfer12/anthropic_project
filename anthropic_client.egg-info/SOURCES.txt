@@ -1,0 +1,12 @@
+README.md
+pyproject.toml
+setup.py
+anthropic_client/__init__.py
+anthropic_client/cli.py
+anthropic_client/client.py
+anthropic_client.egg-info/PKG-INFO
+anthropic_client.egg-info/SOURCES.txt
+anthropic_client.egg-info/dependency_links.txt
+anthropic_client.egg-info/entry_points.txt
+anthropic_client.egg-info/requires.txt
+anthropic_client.egg-info/top_level.txt
