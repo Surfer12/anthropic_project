@@ -1,0 +1,56 @@
+graph TD
+    %% Main Domain Nodes
+    CompDomain[Computational Domain]
+    CogDomain[Cognitive Domain]
+    RepDomain[Representational Domain]
+    
+    %% Integration Space
+    Integration((Integration<br/>Isomorphic Structures))
+    
+    %% Domain-Specific Elements
+    CompDomain --> ThoughtNode["ThoughtNode (struct)"]
+    CompDomain --> MemoCache["Memoization Cache"]
+    CompDomain --> RecFunctions["Recursive Functions"]
+    
+    CogDomain --> WorkingMem["Working Memory"]
+    CogDomain --> LongTermMem["Long-Term Memory"]
+    CogDomain --> MetaCog["Meta-Cognition"]
+    
+    RepDomain --> Anchors["YAML Anchors (&)"]
+    RepDomain --> Aliases["YAML Aliases (*)"]
+    RepDomain --> Hierarchies["Hierarchical Structures"]
+    
+    %% Isomorphism Connections
+    ThoughtNode -.-> RecursiveIso[Recursive Self-Reference]
+    MetaCog -.-> RecursiveIso
+    Anchors -.-> RecursiveIso
+    
+    MemoCache -.-> CompressionIso[Compression/Chunking]
+    LongTermMem -.-> CompressionIso
+    Aliases -.-> CompressionIso
+    
+    RecFunctions -.-> MetaObsIso[Meta-Observational Capacity]
+    MetaCog -.-> MetaObsIso
+    Hierarchies -.-> MetaObsIso
+    
+    %% Integration Connections
+    RecursiveIso --> Integration
+    CompressionIso --> Integration
+    MetaObsIso --> Integration
+    
+    %% Integration Points
+    Integration --> PointA{A: Neural-Inspired<br/>Algorithms}
+    Integration --> PointB{B: Executable<br/>Knowledge Graphs}
+    Integration --> PointC{C: Cognitive YAML<br/>Processing}
+    Integration --> PointD{D: Recursive<br/>Meta-Cognitive CCT}
+    
+    %% Meta-Cognitive Loop
+    classDef domain fill:#f9f9f9,stroke:#333,stroke-width:1px
+    classDef integration fill:#ffd700,stroke:#333,stroke-width:1px
+    classDef isomorphism fill:#f5f5f5,stroke:#6610f2,stroke-width:1px,stroke-dasharray: 5 5
+    classDef point fill:white,stroke:#fd7e14,stroke-width:2px
+    
+    class CompDomain,CogDomain,RepDomain domain
+    class Integration integration
+    class RecursiveIso,CompressionIso,MetaObsIso isomorphism
+    class PointA,PointB,PointC,PointD point
