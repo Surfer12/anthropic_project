@@ -1,0 +1,37 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "../anthropic_project-1"
+		},
+		{
+			"path": "../app"
+		},
+		{
+			"path": "../build"
+		},
+		{
+			"path": "../claude_code_research_preview"
+		},
+		{
+			"path": "../claude_project"
+		},
+		{
+			"path": "../max"
+		},
+		{
+			"path": "../mcpToolsJavaforCursor-windowed"
+		},
+		{
+			"path": "../openai-java-main"
+		},
+		{
+			"path": "../openai-java-main-1"
+		}
+	],
+	"settings": {
+		"java.compile.nullAnalysis.mode": "automatic"
+	}
+}

@@ -1,0 +1,17 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+{
+  "model": "gpt-4.5-preview-2025-02-27",
+  "messages": [],
+  "response_format": {
+    "type": "text"
+  },
+  "temperature": 2,
+  "max_completion_tokens": 16384,
+  "top_p": 1,
+  "frequency_penalty": 0.22,
+  "presence_penalty": 0.23
+}

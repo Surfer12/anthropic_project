@@ -1,0 +1,13 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+{
+  "model": "o3-mini-2025-01-31",
+  "messages": [],
+  "response_format": {
+    "type": "text"
+  },
+  "reasoning_effort": "high"
+}
