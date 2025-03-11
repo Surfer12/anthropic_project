@@ -22,7 +22,6 @@ python {
 task pythonTest(type: PythonTask) {
     module = 'pytest'
     command = "tests -v --cov=anthropic_client_mojo --cov-report=xml --cov-report=html"
-    dependsOn pythonInstall
     
     environment = [
         PYTEST_ADDOPTS: '--cov=anthropic_client_mojo --cov-report=xml --cov-report=html'
