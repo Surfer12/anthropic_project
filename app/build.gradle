@@ -56,9 +56,7 @@ pmd {
 }
 
 spotbugs {
-    toolVersion = '4.8.5'
-    effort = 'MAX'
-    reportLevel = 'medium'
+    toolVersion = '6.0.11'
 }
 
 // Apply a specific Java toolchain to ease working on different environments.
