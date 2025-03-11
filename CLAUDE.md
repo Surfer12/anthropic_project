@@ -5,23 +5,26 @@
 # Install dependencies
 npm install
 pip install -e .
+magic install  # For Max/ML work
 
-# Java/Spring Boot application
-./gradlew bootRun                   # Run the Spring Boot application
-./gradlew build                     # Build the entire project
-./gradlew test                      # Run all tests
+# Gradle commands (Java/Spring Boot)
+./gradlew bootRun                   # Run the application
+./gradlew build                     # Build all projects
+./gradlew testAll                   # Run all tests
 ./gradlew test --tests=TestName     # Run a specific test
-./gradlew codeQualityCheck          # Run checkstyle, PMD, and spotbugs
-./gradlew jacocoTestReport          # Generate test coverage report
+./gradlew qualityCheckAll           # Run all quality checks
+./gradlew setupDev                  # Setup development environment
 
 # Python commands
-pytest                              # Run all Python tests
-pytest tests/test_file.py::test_fn  # Run a specific test
-flake8 anthropic_client             # Lint Python code
-mypy anthropic_client               # Type-check Python code
+pytest                                     # Run all tests
+pytest tests/test_file.py::test_function   # Run a specific test
+pytest --cov=anthropic_client tests/       # Run with coverage
+flake8 anthropic_client                    # Lint code
+mypy anthropic_client                      # Type-check code
+pre-commit run --all-files                 # Run all pre-commit hooks
 
-# Mojo commands (in mojo directories)
-cd src/mojo && magic run mojo file.mojo  # Run Mojo file
+# Node.js / Claude Code CLI
+npx claude-code                            # Run Claude Code CLI
 ```
 
 ## Code Style Guidelines
@@ -30,24 +33,29 @@ cd src/mojo && magic run mojo file.mojo  # Run Mojo file
 - Class names: PascalCase (e.g., `ModelArchitecture`)
 - Methods/variables: camelCase (e.g., `computeScore()`)
 - Constants: UPPER_SNAKE_CASE (e.g., `MAX_SIZE`)
-- Follow Spring Boot conventions for controllers and services
-- Always include JavaDoc for public classes and methods
-- Use explicit error handling with custom exceptions
-- Prefer constructor injection for dependencies
+- Imports: standard library, third-party, project
+- Include JavaDoc for public classes and methods
+- Prefer constructor injection for Spring dependencies
+
+### Python
+- Follow PEP 8 and Black formatting (88 char line length)
+- Function names: snake_case; Class names: PascalCase
+- Imports order: standard library, third-party, local
+- Use type hints and Google-style docstrings
+- Use f-strings for string formatting
+- Validate inputs and handle exceptions with meaningful messages
+- Run pre-commit hooks before committing (black, isort, flake8, mypy)
 
 ### JavaScript/Node.js
-- Function names: camelCase (e.g., `calculateTotal()`)
-- Constants: UPPER_SNAKE_CASE (e.g., `MAX_SIZE`)
+- Function names: camelCase; Constants: UPPER_SNAKE_CASE
 - Use ES6+ features (arrow functions, destructuring)
 - Prefer `const` over `let`, avoid `var`
 - Handle async operations with async/await
 - Use proper error handling with try/catch blocks
 
-### Python/Mojo
-- Function names: snake_case (e.g., `calculate_total()`)
-- Class names: PascalCase (e.g., `ModelTrainer`)
-- Use type hints where appropriate
-- Follow PEP 8 guidelines (88 char line limit)
-- For Mojo: use fully qualified import paths
-- Document functions with Google-style docstrings
-- Handle API exceptions with meaningful error messages
+### Testing Best Practices
+- Use descriptive test names that explain the scenario
+- Follow AAA pattern (Arrange, Act, Assert)
+- Mock external dependencies
+- Test both success and failure cases
+- Include edge cases and boundary conditions
