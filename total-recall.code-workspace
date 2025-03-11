@@ -15,18 +15,6 @@
 		{
 			"name": "mcpToolsJavaforCursor-windowed",
 			"path": "../mcpToolsJavaforCursor-windowed"
-		},
-		{
-			"name": "app",
-			"path": "../app"
-		},
-		{
-			"name": "openai-java-main",
-			"path": "../openai-java-main"
-		},
-		{
-			"name": "openai-java-main-1",
-			"path": "../openai-java-main-1"
 		}
 	],
 	"settings": {
