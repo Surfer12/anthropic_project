@@ -1,33 +1,31 @@
 {
 	"folders": [
 		{
+			"name": "anthropic_project",
 			"path": "."
 		},
 		{
-			"path": "../anthropic_project-1"
-		},
-		{
-			"path": "../app"
-		},
-		{
+			"name": "build",
 			"path": "../build"
 		},
 		{
-			"path": "../claude_code_research_preview"
-		},
-		{
-			"path": "../claude_project"
-		},
-		{
+			"name": "max",
 			"path": "../max"
 		},
 		{
+			"name": "mcpToolsJavaforCursor-windowed",
 			"path": "../mcpToolsJavaforCursor-windowed"
 		},
 		{
+			"name": "app",
+			"path": "../app"
+		},
+		{
+			"name": "openai-java-main",
 			"path": "../openai-java-main"
 		},
 		{
+			"name": "openai-java-main-1",
 			"path": "../openai-java-main-1"
 		}
 	],
