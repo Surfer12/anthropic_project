@@ -1,0 +1,71 @@
+// Root project configuration
+allprojects {
+    group = 'com.anthropic'
+    version = '1.0.0-SNAPSHOT'
+}
+
+// Configuration common to all projects
+subprojects {
+    repositories {
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+
+// Root project tasks
+task clean(type: Delete) {
+    delete rootProject.buildDir
+}
+
+// Combined build task
+task buildAll {
+    dependsOn ':app:build'
+    dependsOn ':python-client:buildPython'
+    group = 'build'
+    description = 'Build all components'
+}
+
+// Combined test task
+task testAll {
+    dependsOn ':app:test'
+    dependsOn ':python-client:runTests'
+    group = 'verification'
+    description = 'Run all tests'
+}
+
+// Combined quality check task
+task qualityCheckAll {
+    dependsOn ':app:codeQualityCheck'
+    dependsOn ':python-client:pythonQualityCheck'
+    group = 'verification'
+    description = 'Run all quality checks'
+}
+
+// Combined documentation task
+task generateAllDocs {
+    dependsOn ':app:javadoc'
+    dependsOn ':python-client:generatePythonDocs'
+    group = 'documentation'
+    description = 'Generate all documentation'
+}
+
+// Task to create release
+task prepareRelease {
+    dependsOn buildAll
+    dependsOn qualityCheckAll
+    dependsOn generateAllDocs
+    group = 'release'
+    description = 'Prepare for release by running all checks and generating artifacts'
+}
+
+// Development setup task
+task setupDev {
+    dependsOn ':python-client:installDevDependencies'
+    group = 'development'
+    description = 'Setup development environment'
+    
+    doLast {
+        println "Development environment setup complete"
+        println "Run './gradlew tasks' to see available tasks"
+    }
+} 

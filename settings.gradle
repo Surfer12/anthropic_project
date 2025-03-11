@@ -1,0 +1,22 @@
+// Configure Python plugin settings
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        mavenCentral()
+    }
+    resolutionStrategy {
+        eachPlugin {
+            if (requested.id.id == 'ru.vyarus.use-python') {
+                useVersion '3.0.0'
+            }
+        }
+    }
+} 
+
+rootProject.name = 'anthropic-project'
+
+include ':app'
+include ':python-client'
+
+project(':python-client').projectDir = file('src/mojo/anthropic_client_mojo')
+

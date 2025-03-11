@@ -1,0 +1,89 @@
+plugins {
+    id 'ru.vyarus.use-python'
+}
+
+python {
+    // Specify Python version
+    pythonBinary = 'python3'
+    
+    // Install required packages
+    pip 'pytest'
+    pip 'anthropic'
+    pip 'pytest-cov'
+    pip 'black'
+    pip 'flake8'
+    pip 'mypy'
+    pip 'sphinx'
+    pip 'sphinx-rtd-theme'
+    
+    // Configure testing
+    pythonTest {
+        module = 'pytest'
+        testTask 'pythonTest'
+        sourceDirs = ['tests']
+        
+        // Enable coverage reporting
+        environment = [
+            PYTEST_ADDOPTS: '--cov=anthropic_client_mojo --cov-report=xml --cov-report=html'
+        ]
+    }
+}
+
+// Task to run Python tests with coverage
+task runTests(type: PythonTask) {
+    command = "-m pytest tests -v --cov=anthropic_client_mojo --cov-report=xml --cov-report=html"
+    dependsOn pythonInstall
+}
+
+// Task to install development dependencies
+task installDevDependencies(type: PythonTask) {
+    command = "-m pip install -r requirements-dev.txt"
+    onlyIf { file('requirements-dev.txt').exists() }
+}
+
+// Task to run black code formatter
+task formatPython(type: PythonTask) {
+    command = "-m black ."
+    group = 'formatting'
+    description = 'Format Python code using black'
+}
+
+// Task to run flake8 linting
+task lintPython(type: PythonTask) {
+    command = "-m flake8 ."
+    group = 'verification'
+    description = 'Lint Python code using flake8'
+}
+
+// Task to run mypy type checking
+task typeCheckPython(type: PythonTask) {
+    command = "-m mypy ."
+    group = 'verification'
+    description = 'Type check Python code using mypy'
+}
+
+// Task to generate Sphinx documentation
+task generatePythonDocs(type: PythonTask) {
+    command = "-m sphinx.cmd.build -b html docs/source docs/build/html"
+    group = 'documentation'
+    description = 'Generate Python documentation using Sphinx'
+    
+    doFirst {
+        mkdir "docs/source"
+        mkdir "docs/build"
+    }
+}
+
+// Combined Python quality check task
+task pythonQualityCheck {
+    dependsOn lintPython, typeCheckPython
+    group = 'verification'
+    description = 'Run all Python code quality checks'
+}
+
+// Combined Python build task
+task buildPython {
+    dependsOn installDevDependencies, formatPython, pythonQualityCheck, runTests, generatePythonDocs
+    group = 'build'
+    description = 'Complete Python build including tests, quality checks, and documentation'
+} 

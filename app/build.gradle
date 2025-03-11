@@ -11,6 +11,13 @@ plugins {
     id 'application'
     id 'org.springframework.boot' version '2.7.0'
     id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+    // Code quality plugins
+    id 'checkstyle'
+    id 'pmd'
+    id 'jacoco'
+    id 'com.github.spotbugs' version '5.2.1'
+    // Add Gradle Enterprise plugin for build scans
+    id 'com.gradle.enterprise' version '3.16.1'
 }
 
 repositories {
@@ -21,7 +28,6 @@ repositories {
 dependencies {
     // Use JUnit Jupiter for testing.
     testImplementation "org.junit.jupiter:junit-jupiter:5.10.2"
-
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
     // This dependency is used by the application.
@@ -37,6 +43,25 @@ dependencies {
     testImplementation 'io.projectreactor:reactor-test:3.4.0'
 }
 
+// Code quality configurations
+checkstyle {
+    toolVersion = '10.12.1'
+    configFile = file("${rootDir}/config/checkstyle/checkstyle.xml")
+    maxWarnings = 0
+}
+
+pmd {
+    toolVersion = '6.55.0'
+    consoleOutput = true
+    ruleSetFiles = files("${rootDir}/config/pmd/ruleset.xml")
+}
+
+spotbugs {
+    toolVersion = '4.8.3'
+    effort = 'max'
+    reportLevel = 'medium'
+}
+
 // Apply a specific Java toolchain to ease working on different environments.
 java {
     toolchain {
@@ -50,6 +75,191 @@ application {
 }
 
 tasks.named('test') {
-    // Use JUnit Platform for unit tests.
+    // Use JUnit Platform for unit tests
     useJUnitPlatform()
+    
+    // Enable JaCoCo coverage
+    finalizedBy jacocoTestReport
+}
+
+jacocoTestReport {
+    dependsOn test
+    reports {
+        xml.required = true
+        html.required = true
+    }
+}
+
+// Add combined quality check task
+task codeQualityCheck {
+    dependsOn 'checkstyleMain', 'pmdMain', 'spotbugsMain'
+    group = 'verification'
+    description = 'Runs all code quality checks'
+}
+
+// Add combined reporting task
+task generateReports {
+    dependsOn 'jacocoTestReport'
+    group = 'reporting'
+    description = 'Generates all reports'
+}
+
+// Magic build configuration
+ext {
+    magicBuildParallel = true  // Enable parallel execution
+    magicBuildCacheEnabled = true  // Enable build cache
+    magicBuildFailFast = true  // Stop on first failure
+}
+
+// Magic build command that orchestrates everything
+task magic {
+    group = 'build'
+    description = 'Magic build command that does everything in the optimal order'
+    
+    // Define task ordering
+    mustRunAfter clean
+    
+    doFirst {
+        // Configure build optimizations
+        if (magicBuildParallel) {
+            gradle.startParameter.parallel = true
+            gradle.startParameter.maxWorkers = Runtime.runtime.availableProcessors()
+        }
+        if (magicBuildCacheEnabled) {
+            gradle.startParameter.buildCacheEnabled = true
+        }
+        if (magicBuildFailFast) {
+            gradle.startParameter.continueOnFailure = false
+        }
+        
+        println """
+??????????????????????????????????????????
+?           MAGIC BUILD START            ?
+?----------------------------------------?
+? Parallel: ${magicBuildParallel ? '?' : '?'}                        ?
+? Cache: ${magicBuildCacheEnabled ? '?' : '?'}                          ?
+? Fail Fast: ${magicBuildFailFast ? '?' : '?'}                       ?
+? Processors: ${Runtime.runtime.availableProcessors()}                        ?
+??????????????????????????????????????????
+"""
+    }
+    
+    doLast {
+        def testResults = tasks.test.didWork ? tasks.test.state.failure == null : false
+        def qualityResults = tasks.codeQualityCheck.didWork ? tasks.codeQualityCheck.state.failure == null : false
+        def coverageResults = tasks.jacocoTestReport.didWork ? tasks.jacocoTestReport.state.failure == null : false
+        
+        println """
+??????????????????????????????????????????
+?         MAGIC BUILD COMPLETE           ?
+?----------------------------------------?
+? Build: ${project.buildDir}             
+? Tests: ${testResults ? '?' : '?'} (${tasks.test.testResult?.testCount ?: 0} tests)
+? Quality Checks: ${qualityResults ? '?' : '?'}
+? Coverage: ${coverageResults ? '?' : '?'} (${-> try { 
+    new XmlSlurper().parse(file("${buildDir}/reports/jacoco/test/jacocoTestReport.xml"))
+    .counter.find { it.@type == 'LINE' }.@covered.toInteger() * 100 /
+    it.@missed.toInteger()
+} catch (any) { 0 }}%)
+??????????????????????????????????????????
+"""
+    }
+}
+
+// Add magic configuration task
+task configureMagic {
+    group = 'build'
+    description = 'Configure magic build settings'
+    
+    doLast {
+        def console = System.console()
+        if (console) {
+            ext.magicBuildParallel = console.readLine('Enable parallel execution? (Y/n): ').toLowerCase() != 'n'
+            ext.magicBuildCacheEnabled = console.readLine('Enable build cache? (Y/n): ').toLowerCase() != 'n'
+            ext.magicBuildFailFast = console.readLine('Enable fail-fast? (Y/n): ').toLowerCase() != 'n'
+            
+            def props = file('gradle.properties')
+            props.text = """
+                # Magic build configuration
+                magicBuildParallel=${ext.magicBuildParallel}
+                magicBuildCacheEnabled=${ext.magicBuildCacheEnabled}
+                magicBuildFailFast=${ext.magicBuildFailFast}
+            """.stripIndent()
+            
+            println "Magic build configuration saved to gradle.properties"
+        } else {
+            println "Console not available. Please edit gradle.properties manually."
+        }
+    }
+}
+
+// Configure magic task dependencies
+magic.dependsOn clean
+magic.dependsOn compileJava
+magic.dependsOn compileTestJava
+magic.dependsOn processResources
+magic.dependsOn processTestResources
+magic.dependsOn codeQualityCheck
+magic.dependsOn test
+magic.dependsOn jacocoTestReport
+magic.dependsOn generateReports
+magic.dependsOn assemble
+magic.dependsOn check
+magic.dependsOn build
+
+// Configure task ordering for magic build
+tasks.named('compileJava') { mustRunAfter clean }
+tasks.named('compileTestJava') { mustRunAfter compileJava }
+tasks.named('processResources') { mustRunAfter clean }
+tasks.named('processTestResources') { mustRunAfter processResources }
+tasks.named('codeQualityCheck') { mustRunAfter compileJava }
+tasks.named('test') { mustRunAfter codeQualityCheck }
+tasks.named('jacocoTestReport') { mustRunAfter test }
+tasks.named('generateReports') { mustRunAfter jacocoTestReport }
+tasks.named('assemble') { mustRunAfter test }
+tasks.named('check') { mustRunAfter assemble }
+tasks.named('build') { mustRunAfter check }
+
+// Add performance tracking
+def startTime
+
+gradle.taskGraph.whenReady { graph ->
+    if (graph.hasTask(magic)) {
+        startTime = System.currentTimeMillis()
+    }
+}
+
+gradle.buildFinished { result ->
+    if (result.gradle.taskGraph.hasTask(magic)) {
+        def duration = System.currentTimeMillis() - startTime
+        println "\nMagic build completed in ${duration/1000} seconds"
+        
+        if (!result.failure) {
+            println "\n? Magic build successful! ?"
+        } else {
+            println "\n? Magic build failed! Check the logs above for details."
+        }
+    }
+}
+
+// Configure Gradle Enterprise and build scans
+gradleEnterprise {
+    buildScan {
+        termsOfServiceUrl = "https://gradle.com/terms-of-service"
+        termsOfServiceAgree = "yes"
+        publishAlways()
+        
+        // Add custom tags
+        tag 'CI'
+        if (gradle.startParameter.taskNames.contains('magic')) {
+            tag 'MAGIC_BUILD'
+        }
+        
+        // Add custom links
+        link 'GitHub', 'https://github.com/anthropic/anthropic_project'
+        
+        // Add build scan metadata
+        value 'Java Version', System.getProperty('java.version')
+        value 'OS', System.getProperty('os.name')
+    }
 } 
