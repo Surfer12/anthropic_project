@@ -15,7 +15,8 @@ plugins {
     id 'checkstyle'
     id 'pmd'
     id 'jacoco'
-    id 'com.github.spotbugs' version '5.2.1'
+    id 'com.github.spotbugs' version '6.0.11'
+    
 }
 
 repositories {
@@ -55,8 +56,8 @@ pmd {
 }
 
 spotbugs {
-    toolVersion = '4.8.3'
-    effort = 'max'
+    toolVersion = '4.8.5'
+    effort = 'MAX'
     reportLevel = 'medium'
 }
 
@@ -64,8 +65,10 @@ spotbugs {
 java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(23)
+        vendor = JvmVendorSpec.ADOPTIUM
     }
-}
+}   
+
 
 application {
     // Define the main class for the application.
@@ -120,10 +123,10 @@ task magic {
     doFirst {
         // Configure build optimizations
         if (magicBuildParallel) {
-            gradle.startParameter.parallel = true
-            gradle.startParameter.maxWorkers = Runtime.runtime.availableProcessors()
+            gradle.startParameter.setParallelProjectExecutionEnabled(true)
+            gradle.startParameter.setMaxWorkerCount(Runtime.runtime.availableProcessors())
         }
-        if (magicBuildCacheEnabled) {
+        if (magicBuildCacheEnabled) { 
             gradle.startParameter.buildCacheEnabled = true
         }
         if (magicBuildFailFast) {
@@ -147,14 +150,15 @@ task magic {
         def qualityResults = tasks.codeQualityCheck.didWork ? tasks.codeQualityCheck.state.failure == null : false
         def coverageResults = tasks.jacocoTestReport.didWork ? tasks.jacocoTestReport.state.failure == null : false
         
+        def coveragePercentage = { -> try { new XmlSlurper().parse(file("${buildDir}/reports/jacoco/test/jacocoTestReport.xml")).counter.find { it.@type == 'LINE' }.@covered.toInteger() * 100 / (it.@missed.toInteger() + it.@covered.toInteger()) } catch (any) { 0 } }.call()
         println """
 ??????????????????????????????????????????
 ?         MAGIC BUILD COMPLETE           ?
 ?----------------------------------------?
 ? Build: ${project.buildDir}             
 ? Tests: ${testResults ? '?' : '?'} (${tasks.test.testResult?.testCount ?: 0} tests)
-? Quality Checks: ${qualityResults ? '?' : '?'}
-? Coverage: ${coverageResults ? '?' : '?'} (${-> try { 
+? Quality Checks: ${qualityResults ? '?' : '?'} 
+? Coverage: ${coverageResults ? '?' : '?'} (${coveragePercentage}%)
     new XmlSlurper().parse(file("${buildDir}/reports/jacoco/test/jacocoTestReport.xml"))
     .counter.find { it.@type == 'LINE' }.@covered.toInteger() * 100 /
     it.@missed.toInteger()
@@ -238,4 +242,4 @@ gradle.buildFinished { result ->
             println "\n? Magic build failed! Check the logs above for details."
         }
     }
-} 
+}

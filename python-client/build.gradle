@@ -1,0 +1,5 @@
+python {
+    pip {
+        install "pytest:8.3.3" // Updated to the latest stable version of pytest as of writing.
+    }
+}
