@@ -13,15 +13,22 @@ struct ClientConfig:
     var model: String
     var max_tokens: Int
     var thinking_budget: Int
+    var temperature: Float64
     
     fn __init__(mut self, api_key: String, 
                 model: String = "claude-3-7-sonnet-20250219",
                 max_tokens: Int = 128000,
-                thinking_budget: Int = 120000):
+                thinking_budget: Int = 120000,
+                temperature: Float64 = 1.0):
+        # Add input validation
+        if temperature < 0.0 or temperature > 1.0:
+            raise Error("Temperature must be between 0.0 and 1.0")
+        
         self.api_key = api_key
         self.model = model
         self.max_tokens = max_tokens
         self.thinking_budget = thinking_budget
+        self.temperature = temperature
 
 fn load_dotenv() raises:
     var dotenv = Python.import_module("dotenv")
@@ -56,64 +63,55 @@ struct AnthropicClient:
     var client: PythonObject
     var config: ClientConfig
     
-    # Make the struct convertible to a PythonObject
+    fn get_python_response(self, prompt: String) raises -> PythonObject:
+        """
+        Direct Python API method for response generation.
+        
+        Args:
+            prompt: Input text prompt
+        
+        Returns:
+            Python response object
+        """
+        var anthropic_py = Python.import_module("anthropic")
+        var client_py = anthropic_py.Anthropic(api_key=self.config.api_key)
+        
+        var messages_list = Python.list()
+        var message = Python.dict()
+        message["role"] = "user"
+        message["content"] = prompt
+        messages_list.append(message)
+        
+        var response_params = Python.dict()
+        response_params["model"] = self.config.model
+        response_params["max_tokens"] = self.config.max_tokens
+        response_params["messages"] = messages_list
+        response_params["temperature"] = self.config.temperature
+        response_params["thinking"] = {"type": "enabled", "budget_tokens": self.config.thinking_budget}
+        response_params["betas"] = ["output-128k-2025-02-19"]
+        
+        # Direct Python function call
+        var response_py = client_py.beta.messages.create(**response_params)
+        
+        return response_py
+
     fn __python__(self) raises -> PythonObject:
-        # Create a Python wrapper to ensure proper conversion
+        """
+        Simplified Python conversion method leveraging direct API call.
+        
+        Returns:
+            Python-compatible wrapper object
+        """
         var py_wrapper = Python.evaluate("""
         class MojoClientWrapper:
-            def __init__(self, client_obj):
-                self.client = client_obj
+            def __init__(self, mojo_client):
+                self.mojo_client = mojo_client
             
-            def get_response(self, prompt, stream=False, temperature=1.0):
-                # This function will be called from Python
-                import anthropic
-                
-                api_key = client_obj.config.api_key
-                model = client_obj.config.model
-                max_tokens = client_obj.config.max_tokens
-                thinking_budget = client_obj.config.thinking_budget
-                
-                try:
-                    anthropic_client = anthropic.Anthropic(api_key=api_key)
-                    
-                    thinking = {"type": "enabled", "budget_tokens": thinking_budget}
-                    betas = ["output-128k-2025-02-19"]
-                    
-                    if stream:
-                        return anthropic_client.beta.messages.create(
-                            model=model,
-                            max_tokens=max_tokens,
-                            messages=[{"role": "user", "content": prompt}],
-                            temperature=temperature,
-                            thinking=thinking,
-                            betas=betas,
-                            stream=True
-                        )
-                    else:
-                        response = anthropic_client.beta.messages.create(
-                            model=model,
-                            max_tokens=max_tokens,
-                            messages=[{"role": "user", "content": prompt}],
-                            temperature=temperature,
-                            thinking=thinking,
-                            betas=betas
-                        )
-                        return response.content[0].text
-                except Exception as e:
-                    raise Exception(f"Error calling Anthropic API: {e}")
-                
+            def get_response(self, prompt, stream=False):
+                return self.mojo_client.get_python_response(prompt)
+        
         MojoClientWrapper
         """)
-        
-        # Create a python representation of our config values
-        var py_config = Python.dict()
-        py_config["api_key"] = self.config.api_key
-        py_config["model"] = self.config.model
-        py_config["max_tokens"] = self.config.max_tokens
-        py_config["thinking_budget"] = self.config.thinking_budget
-        
-        # Return a Python object that wraps this client
-        return py_wrapper(py_config)
     
     fn __init__(mut self) raises:
         load_dotenv()
@@ -125,17 +123,14 @@ struct AnthropicClient:
         var anthropic = Python.import_module("anthropic")
         self.client = anthropic.Anthropic(api_key=api_key)
     
-    fn get_response(self, prompt: String, stream: Bool = False, temperature: Float64 = 1.0) raises -> PythonObject:
+    fn get_response(self, prompt: String, stream: Bool = False) raises -> PythonObject:
         """
         The prompt to send to Claude.
         Args:
             prompt: The text prompt to send to Claude.
             stream: Whether to stream the response.
-            temperature: Controls randomness in the response (0-1).
         """
         # Input validation with early returns
-        if temperature < 0.0 or temperature > 1.0:
-            raise Error("Temperature must be between 0.0 and 1.0")
         if len(prompt.strip()) == 0:
             raise Error("Prompt cannot be empty")
         
@@ -183,7 +178,7 @@ struct AnthropicClient:
             self.config.model, 
             self.config.max_tokens, 
             messages_list, 
-            temperature, 
+            self.config.temperature,  # Use configuration temperature 
             stream, 
             self.config.thinking_budget
         )

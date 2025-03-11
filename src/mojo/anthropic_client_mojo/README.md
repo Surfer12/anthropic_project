@@ -1,3 +1,64 @@
+# Mojo Anthropic Claude Client
+
+## Overview
+This Mojo implementation provides a high-performance, type-safe client for interacting with Anthropic's Claude API, with advanced Max computational integration.
+
+## Features
+- Type-safe Anthropic API client
+- Streaming and non-streaming response modes
+- Max computational data analysis
+- Robust error handling
+- Configurable model parameters
+
+## Configuration
+The `ClientConfig` struct allows fine-grained configuration:
+- `api_key`: Your Anthropic API key
+- `model`: Claude model version (default: claude-3-sonnet-20250219)
+- `max_tokens`: Maximum token limit (default: 128000)
+- `thinking_budget`: Thinking process token budget (default: 120000)
+- `temperature`: Response creativity (0.0 - 1.0, default: 1.0)
+
+## Max Integration
+The `MaxAnthropicIntegration` provides specialized methods for computational workflows:
+- `process_max_prompt()`: Process prompts with computational context
+- `stream_max_response()`: Stream responses with context
+- `analyze_max_data()`: Analyze computational data structures
+
+## Example Usage
+
+### Basic Client
+```mojo
+from client import AnthropicClient, ClientConfig
+
+fn main() raises:
+    var config = ClientConfig(
+        api_key="your-api-key", 
+        temperature=0.7
+    )
+    var client = AnthropicClient(config)
+    var response = client.get_response("Explain quantum computing")
+```
+
+### Max Integration
+```mojo
+from max_integration import MaxAnthropicIntegration
+
+fn main() raises:
+    var max_integration = MaxAnthropicIntegration()
+    var data = Python.dict()  # Your Max computational data
+    var analysis = max_integration.analyze_max_data(data)
+```
+
+## Error Handling
+- Validates input parameters
+- Provides descriptive error messages
+- Supports environment-based API key loading
+
+## Performance Considerations
+- Leverages Mojo's compile-time optimizations
+- Minimal runtime overhead
+- Efficient Python interoperability
+
 # Anthropic API Client - Mojo Implementation
 
 This directory contains the Mojo implementation of the Anthropic API client. The Mojo version provides better performance compared to the standard Python implementation.

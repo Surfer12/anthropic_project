@@ -128,8 +128,7 @@ fn main() raises:
                 "messages": messages,
                 "temperature": float(temperature_value),
                 "thinking": {"type": "enabled", "budget_tokens": 120000},
-                "betas": ["output-128k-2025-02-19"],
-                "citations": {"enabled": True}
+                "betas": ["output-128k-2025-02-19"]
             }
             
             # Add format-specific parameters
