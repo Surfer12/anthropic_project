@@ -1,0 +1,38 @@
+spring:
+  profiles: test
+
+rcct:
+  thought-processing:
+    max-chain-length: 10
+    min-confidence-threshold: 0.7
+    processing-timeout-ms: 5000
+    
+  domain-mapping:
+    similarity-threshold: 0.5
+    max-dimension-difference: 2
+    mapping-timeout-ms: 3000
+    
+  metacognitive-monitoring:
+    anomaly-threshold: 0.3
+    coherence-threshold: 0.8
+    max-error-count: 5
+    monitoring-interval-ms: 1000
+
+  test:
+    source-domains:
+      - name: mathematics
+        dimensionality: 3
+        complexity: high
+        attributes:
+          - abstraction
+          - logic
+          - structure
+          
+    target-domains:
+      - name: physics
+        dimensionality: 4
+        complexity: high
+        attributes:
+          - empirical
+          - measurement
+          - prediction 
