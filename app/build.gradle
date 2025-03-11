@@ -16,8 +16,6 @@ plugins {
     id 'pmd'
     id 'jacoco'
     id 'com.github.spotbugs' version '5.2.1'
-    // Add Gradle Enterprise plugin for build scans
-    id 'com.gradle.enterprise' version '3.16.1'
 }
 
 repositories {
@@ -239,27 +237,5 @@ gradle.buildFinished { result ->
         } else {
             println "\n? Magic build failed! Check the logs above for details."
         }
-    }
-}
-
-// Configure Gradle Enterprise and build scans
-gradleEnterprise {
-    buildScan {
-        termsOfServiceUrl = "https://gradle.com/terms-of-service"
-        termsOfServiceAgree = "yes"
-        publishAlways()
-        
-        // Add custom tags
-        tag 'CI'
-        if (gradle.startParameter.taskNames.contains('magic')) {
-            tag 'MAGIC_BUILD'
-        }
-        
-        // Add custom links
-        link 'GitHub', 'https://github.com/anthropic/anthropic_project'
-        
-        // Add build scan metadata
-        value 'Java Version', System.getProperty('java.version')
-        value 'OS', System.getProperty('os.name')
     }
 } 
