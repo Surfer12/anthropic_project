@@ -4,13 +4,18 @@ from math import sqrt, exp
 from memory.unsafe import Pointer
 from utils.vector import DynamicVector
 from accelerator.metal_kernels import ADVANCED_METAL_KERNELS
+from accelerator.memory_pool import MemoryPool
+from profiler.gpu_profiler import GPUProfiler
 
+@value
 struct MetalOptimizer:
     var device: MetalDevice
     var compute: MetalCompute
     var workgroup_size: Int
     var max_buffer_size: Int
     var shared_memory_size: Int
+    var memory_pool: MemoryPool
+    var profiler: GPUProfiler
     
     fn __init__(inout self, 
                 workgroup_size: Int = 256, 
@@ -21,12 +26,17 @@ struct MetalOptimizer:
         self.workgroup_size = workgroup_size
         self.max_buffer_size = max_buffer_size
         self.shared_memory_size = shared_memory_size
+        self.memory_pool = MemoryPool(self.device)
+        self.profiler = GPUProfiler()
     
     fn matrix_multiply[dtype: DType](
         self,
         matrix1: Tensor[dtype],
         matrix2: Tensor[dtype]
     ) raises -> Tensor[dtype]:
+        self.profiler.start_kernel("matrix_multiply")
+        let bytes_processed = matrix1.size() * matrix2.size() * sizeof[dtype]()
+        
         let M = matrix1.shape[0]
         let K = matrix1.shape[1]
         let N = matrix2.shape[1]
@@ -34,13 +44,20 @@ struct MetalOptimizer:
         # Create result tensor
         var result = Tensor[dtype](M, N)
         
-        # Create Metal buffers
-        let matrix1_buffer = self.device.buffer_from_memory(matrix1.data, M * K * sizeof[dtype]())
-        let matrix2_buffer = self.device.buffer_from_memory(matrix2.data, K * N * sizeof[dtype]())
-        let result_buffer = self.device.create_buffer(M * N * sizeof[dtype]())
-        let M_buffer = self.device.buffer_from_value(M)
-        let N_buffer = self.device.buffer_from_value(N)
-        let K_buffer = self.device.buffer_from_value(K)
+        # Allocate buffers from pool
+        let matrix1_buffer = self.memory_pool.allocate(M * K * sizeof[dtype]())
+        let matrix2_buffer = self.memory_pool.allocate(K * N * sizeof[dtype]())
+        let result_buffer = self.memory_pool.allocate(M * N * sizeof[dtype]())
+        let M_buffer = self.memory_pool.allocate(sizeof[Int]())
+        let N_buffer = self.memory_pool.allocate(sizeof[Int]())
+        let K_buffer = self.memory_pool.allocate(sizeof[Int]())
+        
+        # Copy data to buffers
+        matrix1_buffer.copy_from(matrix1.data, M * K * sizeof[dtype]())
+        matrix2_buffer.copy_from(matrix2.data, K * N * sizeof[dtype]())
+        M_buffer.copy_from(Pointer[Int](&M), sizeof[Int]())
+        N_buffer.copy_from(Pointer[Int](&N), sizeof[Int]())
+        K_buffer.copy_from(Pointer[Int](&K), sizeof[Int]())
         
         # Configure compute pipeline
         let pipeline = self.compute.make_pipeline("matrix_multiply")
@@ -62,6 +79,16 @@ struct MetalOptimizer:
         
         # Copy result
         result.data.copy_from(Pointer[dtype](result_buffer.contents()), M * N)
+        
+        # Deallocate buffers
+        self.memory_pool.deallocate(matrix1_buffer.id)
+        self.memory_pool.deallocate(matrix2_buffer.id)
+        self.memory_pool.deallocate(result_buffer.id)
+        self.memory_pool.deallocate(M_buffer.id)
+        self.memory_pool.deallocate(N_buffer.id)
+        self.memory_pool.deallocate(K_buffer.id)
+        
+        self.profiler.end_kernel("matrix_multiply", bytes_processed)
         return result
     
     fn vector_quantize[dtype: DType](
@@ -198,3 +225,21 @@ struct MetalOptimizer:
         # Copy result
         similarities.data.copy_from(Pointer[dtype](similarities_buffer.contents()), num_vectors)
         return similarities 
+    
+    fn get_performance_stats(self) -> Tuple[DynamicVector[KernelStats], MemoryStats]:
+        return (
+            self.profiler.get_kernel_stats(),
+            self.profiler.get_memory_stats()
+        )
+    
+    fn reset_profiler(inout self):
+        self.profiler.reset()
+    
+    fn enable_profiling(inout self):
+        self.profiler.enable()
+    
+    fn disable_profiling(inout self):
+        self.profiler.disable()
+    
+    fn get_memory_pool_stats(self) -> PerfStats:
+        return self.memory_pool.get_stats() 
