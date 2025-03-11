@@ -1,0 +1,15 @@
+name: Integration Tests
+on: [push, pull_request]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Java
+        uses: actions/setup-java@v2
+      - name: Set up Mojo
+        uses: actions/setup-mojo@v1
+      - name: Run Tests
+        run: |
+          ./gradlew test
+          mojo test

@@ -1,0 +1,229 @@
+# Unified Linting Rules Configuration
+# This file defines the core linting rules that are applied across different programming languages
+
+version: 1.0.0
+last_updated: "2024-03-01"
+
+# Global settings that apply to all languages
+global:
+  max_line_length: 100
+  indent_size: 4
+  tab_width: 4
+  end_of_line: lf
+  charset: utf-8
+  trim_trailing_whitespace: true
+  insert_final_newline: true
+  max_file_length: 1000
+
+# Language-specific configurations
+languages:
+  python:
+    formatter: black
+    linters: [flake8, mypy]
+    rules:
+      # Code layout
+      indent_style: space
+      max_line_length: 100
+      blank_lines_after_imports: 2
+      blank_lines_between_functions: 2
+      
+      # Naming conventions
+      class_naming: PascalCase
+      function_naming: snake_case
+      variable_naming: snake_case
+      constant_naming: UPPER_SNAKE_CASE
+      
+      # Import organization
+      import_order: [stdlib, third_party, first_party]
+      group_imports: true
+      sort_imports: true
+      
+      # Type system
+      type_annotations: required
+      disallow_untyped_defs: true
+      disallow_incomplete_defs: true
+      check_untyped_defs: true
+      disallow_untyped_decorators: true
+      no_implicit_optional: true
+      warn_redundant_casts: true
+      warn_unused_ignores: true
+      warn_return_any: true
+      warn_unreachable: true
+      
+      # Documentation
+      docstring_style: google
+      require_docstrings: true
+      docstring_min_length: 20
+      
+      # Code quality
+      max_complexity: 10
+      max_function_length: 50
+      max_arguments: 5
+      max_attributes: 7
+      
+  java:
+    formatter: google-java-format
+    linters: [checkstyle, pmd, spotbugs]
+    rules:
+      # Code layout
+      indent_style: space
+      max_line_length: 100
+      blank_lines_after_package: 1
+      blank_lines_after_imports: 1
+      
+      # Naming conventions
+      class_naming: PascalCase
+      method_naming: camelCase
+      variable_naming: camelCase
+      constant_naming: UPPER_SNAKE_CASE
+      
+      # Import organization
+      import_order: [java, javax, org, com]
+      group_imports: true
+      sort_imports: true
+      
+      # Documentation
+      javadoc_required: true
+      javadoc_min_length: 20
+      
+      # Code quality
+      max_complexity: 15
+      max_method_length: 50
+      max_parameters: 5
+      max_fields: 10
+      
+  cpp:
+    formatter: clang-format
+    linters: [clang-tidy]
+    rules:
+      # Code layout
+      indent_style: space
+      max_line_length: 100
+      namespace_indent: none
+      
+      # Naming conventions
+      class_naming: PascalCase
+      function_naming: camelCase
+      variable_naming: snake_case
+      constant_naming: UPPER_SNAKE_CASE
+      
+      # Include organization
+      include_order: [system, library, project]
+      group_includes: true
+      sort_includes: true
+      
+      # Documentation
+      doxygen_required: true
+      doxygen_min_length: 20
+      
+      # Code quality
+      max_complexity: 15
+      max_function_length: 50
+      max_parameters: 5
+      max_members: 10
+      
+  markdown:
+    formatter: prettier
+    linters: [markdownlint]
+    rules:
+      # Document structure
+      max_line_length: 100
+      require_header_section: true
+      header_increment: true
+      
+      # Content
+      no_trailing_punctuation: true
+      no_duplicate_header: true
+      single_h1: true
+      
+      # Formatting
+      no_trailing_spaces: true
+      no_multiple_blanks: true
+      list_indent: 2
+      code_block_style: fenced
+
+# Rule categories for technical debt tracking
+technical_debt_categories:
+  performance:
+    priority: high
+    review_frequency: monthly
+    metrics:
+      - execution_time
+      - memory_usage
+      - resource_utilization
+      
+  security:
+    priority: critical
+    review_frequency: weekly
+    metrics:
+      - vulnerability_score
+      - compliance_status
+      - risk_level
+      
+  maintainability:
+    priority: medium
+    review_frequency: quarterly
+    metrics:
+      - complexity
+      - duplication
+      - documentation_coverage
+      
+  architecture:
+    priority: high
+    review_frequency: monthly
+    metrics:
+      - coupling
+      - cohesion
+      - dependency_count
+      
+  testing:
+    priority: medium
+    review_frequency: monthly
+    metrics:
+      - test_coverage
+      - test_quality
+      - test_execution_time
+
+# Exemption policies
+exemption_policies:
+  approval_required: true
+  max_duration: 180  # days
+  documentation_required:
+    - technical_justification
+    - alternatives_considered
+    - impact_assessment
+    - review_timeline
+  review_process:
+    - technical_review
+    - security_review
+    - architecture_review
+  expiration:
+    notification_days: [30, 14, 7, 1]
+    action_on_expire: warn
+
+# Integration settings
+integrations:
+  ci_cd:
+    block_on_violations: true
+    report_format: html
+    notification_channels:
+      - email
+      - slack
+    metrics_collection: true
+    
+  ide:
+    live_feedback: true
+    quick_fixes: true
+    documentation_hints: true
+    
+  issue_tracking:
+    create_tickets: true
+    priority_mapping:
+      critical: P0
+      high: P1
+      medium: P2
+      low: P3
+    labels:
+      - technical-debt
+      - linting
+      - code-quality

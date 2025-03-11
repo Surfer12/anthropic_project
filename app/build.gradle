@@ -9,8 +9,8 @@ plugins {
     // Apply the application plugin to add support for building a CLI application in Java.
     id 'java'
     id 'application'
-    id 'org.springframework.boot' version '2.7.0'
-    id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+    id 'org.springframework.boot' version '3.4.2'
+    id 'io.spring.dependency-management' version '1.1.4'
     // Code quality plugins
     id 'checkstyle'
     id 'pmd'
@@ -34,11 +34,11 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
     implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
-    implementation 'io.projectreactor:reactor-core:3.4.0'
-    implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.13.0'
+    implementation 'io.projectreactor:reactor-core'
+    implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml'
     
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testImplementation 'io.projectreactor:reactor-test:3.4.0'
+    testImplementation 'io.projectreactor:reactor-test'
 }
 
 // Code quality configurations

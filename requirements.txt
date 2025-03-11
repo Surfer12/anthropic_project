@@ -1,7 +1,18 @@
-anthropic>=0.18.1
-python-dotenv>=1.0.0
-pytest>=7.0.0
-flake8>=6.0.0
-mypy>=1.0.0
-black>=23.0.0  # Code formatting
-isort>=5.0.0   # Import sorting 
+# Core dependencies
+PyYAML==6.0.1
+rich==13.7.0
+
+# Linting tools
+black==24.1.1
+flake8==7.0.0
+mypy==1.8.0
+isort==5.13.2
+
+# Type stubs
+types-PyYAML==6.0.12.12
+types-setuptools==69.1.0.20240301
+
+# Development dependencies
+pytest==8.0.2
+pytest-cov==4.1.0
+pre-commit==3.6.2 
