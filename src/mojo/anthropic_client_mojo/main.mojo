@@ -1,19 +1,41 @@
 """
 Main entry point for the Mojo version of the Anthropic Claude API client.
+Provides CLI guidance and project information.
 """
 
 from python import Python
 
 fn main() raises:
-    print("Running Anthropic Claude CLI (Mojo wrapper)...")
+    print("🤖 Anthropic Claude Mojo Client CLI 🤖")
+    print("\n--- Project Overview ---")
+    print("A high-performance Mojo implementation of the Anthropic Claude API client")
+    print("Optimized for: Performance, Caching, Parallel Processing\n")
     
-    # Create a simple Python function to show CLI usage
-    var show_help = Python.evaluate("lambda: print('Anthropic CLI Help\\n\\nUsage: python python_cli.py [prompt]\\n\\nOptions:\\n  -h, --help         Show this help message\\n  -s, --stream       Stream the response\\n  -t, --temperature  Set temperature (0.0-1.0)\\n  -d, --dry-run      Test mode without API calls')")
+    print("--- CLI Usage Options ---")
+    var show_help = Python.evaluate("""
+    lambda: print('''
+    Usage Modes:
+    1. Standard Interaction:
+       python python_cli.py 'Your prompt here'
+
+    2. Streaming Response:
+       python python_cli.py -s 'Your prompt here'
+
+    3. Dry Run (Test Mode):
+       python python_cli.py -d 'Your prompt here'
+
+    Options:
+      -h, --help         Show this help message
+      -s, --stream       Stream the response
+      -t, --temperature  Set response temperature (0.0-1.0)
+      -d, --dry-run      Test mode without API calls
+    ''')
+    """)
     show_help()
     
-    print("\nTo use the client, please run the Python version directly:")
-    print("python anthropic_client_mojo/python_cli.py 'Your prompt here'\n")
-    print("For streaming responses:")
-    print("python anthropic_client_mojo/python_cli.py -s 'Your prompt here'\n")
-    print("To test without making API calls:")
-    print("python anthropic_client_mojo/python_cli.py -d 'Your prompt here'\n")
+    print("\n--- Quick Start ---")
+    print("1. Ensure Mojo and Python are installed")
+    print("2. Set up Anthropic API credentials")
+    print("3. Run the CLI with your desired prompt\n")
+    
+    print("For more details, check the documentation in docs/README.md")
