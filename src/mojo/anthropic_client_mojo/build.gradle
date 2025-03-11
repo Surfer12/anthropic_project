@@ -1,5 +1,6 @@
 plugins {
-    id 'ru.vyarus.use-python'
+    id 'ru.vyarus.use-python'  // Gradle plugin that enables Python integration within Gradle builds
+                               // Allows managing Python environments, dependencies, and running Python tasks
 }
 
 python {
@@ -15,24 +16,17 @@ python {
     pip 'mypy'
     pip 'sphinx'
     pip 'sphinx-rtd-theme'
-    
-    // Configure testing
-    pythonTest {
-        module = 'pytest'
-        testTask 'pythonTest'
-        sourceDirs = ['tests']
-        
-        // Enable coverage reporting
-        environment = [
-            PYTEST_ADDOPTS: '--cov=anthropic_client_mojo --cov-report=xml --cov-report=html'
-        ]
-    }
 }
 
 // Task to run Python tests with coverage
-task runTests(type: PythonTask) {
-    command = "-m pytest tests -v --cov=anthropic_client_mojo --cov-report=xml --cov-report=html"
+task pythonTest(type: PythonTask) {
+    module = 'pytest'
+    command = "tests -v --cov=anthropic_client_mojo --cov-report=xml --cov-report=html"
     dependsOn pythonInstall
+    
+    environment = [
+        PYTEST_ADDOPTS: '--cov=anthropic_client_mojo --cov-report=xml --cov-report=html'
+    ]
 }
 
 // Task to install development dependencies
@@ -83,7 +77,7 @@ task pythonQualityCheck {
 
 // Combined Python build task
 task buildPython {
-    dependsOn installDevDependencies, formatPython, pythonQualityCheck, runTests, generatePythonDocs
+    dependsOn installDevDependencies, formatPython, pythonQualityCheck, pythonTest, generatePythonDocs
     group = 'build'
     description = 'Complete Python build including tests, quality checks, and documentation'
 } 
