@@ -1,0 +1,36 @@
+[package]
+name = "problem-solver"
+version = "1.0.0"
+description = "Problem solving implementation using CCT Framework"
+
+[dependencies]
+cct-framework = "1.0.0"
+tensor = "0.2.0"
+benchmark = "0.1.0"
+
+[build]
+target = "problem-solver"
+optimize = true
+simd = true
+
+[test]
+framework = "pytest"
+coverage = true
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+
+[profile.dev]
+opt-level = 0
+debug = true
+
+[features]
+default = ["gpu-acceleration", "parallel-processing"]
+gpu-acceleration = []
+parallel-processing = []
+
+[benchmark]
+harness = true
+criterion = "0.4.0" 
