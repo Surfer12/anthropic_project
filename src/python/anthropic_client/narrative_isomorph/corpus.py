@@ -1,204 +1,57 @@
-"""
-NarrativeCorpus module for managing source narratives and their transformations.
-"""
-
-from typing import Dict, List, Any, Optional, Union
-import pandas as pd
-import numpy as np
-import json
-import os
-from pathlib import Path
-
-
+# This module handles the corpus management for narrative analysis
 class NarrativeCorpus:
-    """
-    Manages source narratives and their transformations across different
-    language model architectures.
-    """
-    
-    def __init__(self, name: str = "default_corpus"):
+    def __init__(self, source_narratives=None, architecture_outputs=None):
         """
-        Initialize a new NarrativeCorpus.
+        Initialize a narrative corpus with source texts and architecture outputs.
         
         Args:
-            name: A descriptive name for this corpus
+            source_narratives: Dict mapping narrative IDs to source text.
+            architecture_outputs: Dict mapping (narrative_id, architecture_id) tuples to outputs.
         """
-        self.name = name
-        self.source_narratives: Dict[str, Dict[str, Any]] = {}
-        self.architecture_outputs: Dict[str, Dict[str, Dict[str, Any]]] = {}
-        self.metadata: Dict[str, Any] = {"version": "0.1.0", "created_at": pd.Timestamp.now().isoformat()}
-    
-    def add_source_narrative(self, narrative_id: str, text: str, metadata: Optional[Dict[str, Any]] = None) -> None:
+        self.source_narratives = source_narratives or {}
+        self.architecture_outputs = architecture_outputs or {}
+        self.preprocessed = False
+        
+    def preprocess_corpus(self):
         """
-        Add a source narrative to the corpus.
-        
-        Args:
-            narrative_id: Unique identifier for the narrative
-            text: The narrative text content
-            metadata: Optional metadata about the narrative (source, genre, etc.)
+        Preprocess the corpus for analysis.
         """
-        if narrative_id in self.source_narratives:
-            raise ValueError(f"Narrative ID '{narrative_id}' already exists in corpus")
+        # PLACEHOLDER: Add actual preprocessing logic here
+        self.preprocessed = True
+        return self
         
-        self.source_narratives[narrative_id] = {
-            "text": text,
-            "metadata": metadata or {},
-            "added_at": pd.Timestamp.now().isoformat()
-        }
-    
-    def add_architecture_output(self, 
-                               narrative_id: str, 
-                               architecture_id: str, 
-                               output_text: str,
-                               metadata: Optional[Dict[str, Any]] = None) -> None:
+    def add_narrative(self, narrative_id, text):
         """
-        Add an architecture's output for a given source narrative.
-        
-        Args:
-            narrative_id: ID of the source narrative
-            architecture_id: Identifier for the architecture (e.g., "claude-3-opus")
-            output_text: The transformed narrative from the architecture
-            metadata: Optional metadata about the transformation process
+        Add a narrative to the corpus.
         """
-        if narrative_id not in self.source_narratives:
-            raise ValueError(f"Source narrative '{narrative_id}' not found in corpus")
+        self.source_narratives[narrative_id] = text
+        self.preprocessed = False
         
-        if narrative_id not in self.architecture_outputs:
-            self.architecture_outputs[narrative_id] = {}
-        
-        self.architecture_outputs[narrative_id][architecture_id] = {
-            "text": output_text,
-            "metadata": metadata or {},
-            "processed_at": pd.Timestamp.now().isoformat()
-        }
-    
-    def get_source_narrative(self, narrative_id: str) -> str:
+    def add_architecture_output(self, narrative_id, architecture_id, output):
         """
-        Get a source narrative text by ID.
-        
-        Args:
-            narrative_id: ID of the narrative to retrieve
-            
-        Returns:
-            The narrative text
+        Add an architecture's output for a specific narrative.
         """
-        if narrative_id not in self.source_narratives:
-            raise ValueError(f"Source narrative '{narrative_id}' not found in corpus")
+        self.architecture_outputs[(narrative_id, architecture_id)] = output
+        self.preprocessed = False
         
-        return self.source_narratives[narrative_id]["text"]
-    
-    def get_architecture_output(self, narrative_id: str, architecture_id: str) -> str:
+    def get_narratives(self):
         """
-        Get the output of a specific architecture for a specific narrative.
-        
-        Args:
-            narrative_id: ID of the source narrative
-            architecture_id: ID of the architecture
-            
-        Returns:
-            The transformed narrative text
+        Get all narratives in the corpus.
         """
-        if (narrative_id not in self.architecture_outputs or 
-            architecture_id not in self.architecture_outputs[narrative_id]):
-            raise ValueError(
-                f"No output found for narrative '{narrative_id}' and architecture '{architecture_id}'"
-            )
+        return self.source_narratives
         
-        return self.architecture_outputs[narrative_id][architecture_id]["text"]
-    
-    def list_narratives(self) -> List[str]:
-        """List all narrative IDs in the corpus."""
-        return list(self.source_narratives.keys())
-    
-    def list_architectures(self) -> List[str]:
-        """List all unique architecture IDs across all narratives."""
-        architectures = set()
-        for outputs in self.architecture_outputs.values():
-            architectures.update(outputs.keys())
-        return list(architectures)
-    
-    def save(self, directory: Union[str, Path]) -> None:
+    def get_architecture_outputs(self, narrative_id=None, architecture_id=None):
         """
-        Save the corpus to disk.
-        
-        Args:
-            directory: Directory where to save the corpus
+        Get architecture outputs, optionally filtered by narrative or architecture.
         """
-        directory = Path(directory)
-        directory.mkdir(parents=True, exist_ok=True)
-        
-        # Save metadata and structure
-        with open(directory / f"{self.name}_metadata.json", "w") as f:
-            json.dump(self.metadata, f, indent=2)
-        
-        # Save source narratives
-        source_dir = directory / "sources"
-        source_dir.mkdir(exist_ok=True)
-        
-        for narrative_id, narrative in self.source_narratives.items():
-            with open(source_dir / f"{narrative_id}.json", "w") as f:
-                json.dump(narrative, f, indent=2)
-        
-        # Save architecture outputs
-        outputs_dir = directory / "outputs"
-        outputs_dir.mkdir(exist_ok=True)
-        
-        for narrative_id, architectures in self.architecture_outputs.items():
-            narrative_dir = outputs_dir / narrative_id
-            narrative_dir.mkdir(exist_ok=True)
-            
-            for architecture_id, output in architectures.items():
-                with open(narrative_dir / f"{architecture_id}.json", "w") as f:
-                    json.dump(output, f, indent=2)
-    
-    @classmethod
-    def load(cls, directory: Union[str, Path]) -> "NarrativeCorpus":
-        """
-        Load a corpus from disk.
-        
-        Args:
-            directory: Directory containing the corpus
-            
-        Returns:
-            The loaded NarrativeCorpus
-        """
-        directory = Path(directory)
-        
-        # Find metadata file
-        metadata_files = list(directory.glob("*_metadata.json"))
-        if not metadata_files:
-            raise ValueError(f"No metadata file found in {directory}")
-        
-        with open(metadata_files[0], "r") as f:
-            metadata = json.load(f)
-        
-        corpus_name = metadata_files[0].stem.replace("_metadata", "")
-        corpus = cls(name=corpus_name)
-        corpus.metadata = metadata
-        
-        # Load source narratives
-        source_dir = directory / "sources"
-        if source_dir.exists():
-            for source_file in source_dir.glob("*.json"):
-                with open(source_file, "r") as f:
-                    narrative_data = json.load(f)
-                
-                narrative_id = source_file.stem
-                corpus.source_narratives[narrative_id] = narrative_data
-        
-        # Load architecture outputs
-        outputs_dir = directory / "outputs"
-        if outputs_dir.exists():
-            for narrative_dir in outputs_dir.iterdir():
-                if narrative_dir.is_dir():
-                    narrative_id = narrative_dir.name
-                    corpus.architecture_outputs[narrative_id] = {}
-                    
-                    for output_file in narrative_dir.glob("*.json"):
-                        with open(output_file, "r") as f:
-                            output_data = json.load(f)
-                        
-                        architecture_id = output_file.stem
-                        corpus.architecture_outputs[narrative_id][architecture_id] = output_data
-        
-        return corpus
+        if narrative_id and architecture_id:
+            return {k: v for k, v in self.architecture_outputs.items() 
+                    if k[0] == narrative_id and k[1] == architecture_id}
+        elif narrative_id:
+            return {k: v for k, v in self.architecture_outputs.items() 
+                    if k[0] == narrative_id}
+        elif architecture_id:
+            return {k: v for k, v in self.architecture_outputs.items() 
+                    if k[1] == architecture_id}
+        else:
+            return self.architecture_outputs

@@ -1,0 +1,6 @@
+{
+  "project": "NarrativeIsomorph",
+  "build_command": "mcp build",
+  "test_command": "python -m unittest discover tests",
+  "version": "0.1.0"
+}
