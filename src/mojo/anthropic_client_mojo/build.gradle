@@ -18,20 +18,10 @@ python {
     pip 'sphinx-rtd-theme'
 }
 
-task mojoPipInstall(type: PythonTask) {
-    command = "-m pip install ."
-    group = 'build'
-    description = 'Install Python dependencies using pip'
-    onlyIf { file('requirements.txt').exists() || file('setup.py').exists() }
-}
-
 // Task to run Python tests with coverage
 task pythonTest(type: PythonTask) {
     module = 'pytest'
     command = "tests -v --cov=anthropic_client_mojo --cov-report=xml --cov-report=html"
-
-    // Removed dependency on 'installDevDependencies' to avoid evaluation errors in dependent projects.
-    dependsOn mojoPipInstall, 'python-client:mojoPipInstall'
 }
 
 // Task to install development dependencies
@@ -90,7 +80,7 @@ task pythonQualityCheck {
 
 // Combined Python build task
 task buildPython {
-    dependsOn mojoPipInstall, installDevDependencies, formatPython, pythonQualityCheck, pythonTest, generatePythonDocs
+    dependsOn installDevDependencies, formatPython, pythonQualityCheck, pythonTest, generatePythonDocs
     group = 'build'
     description = 'Complete Python build including tests, quality checks, and documentation'
 }
