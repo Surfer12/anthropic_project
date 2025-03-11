@@ -1,0 +1,2 @@
+[console_scripts]
+claudethink = anthropic_client.cli:main

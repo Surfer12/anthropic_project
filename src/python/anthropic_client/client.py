@@ -70,8 +70,7 @@ class AnthropicClient:
                 "type": "enabled",
                 "budget_tokens": self.THINKING_BUDGET
             },
-            "betas": ["output-128k-2025-02-19"],
-            "citations": {"enabled": True}
+            "betas": ["output-128k-2025-02-19"]
         }
         
         if format == OutputFormat.JSON:

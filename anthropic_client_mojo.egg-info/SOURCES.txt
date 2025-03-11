@@ -1,0 +1,9 @@
+LICENSE
+README.md
+pyproject.toml
+setup.py
+anthropic_client_mojo.egg-info/PKG-INFO
+anthropic_client_mojo.egg-info/SOURCES.txt
+anthropic_client_mojo.egg-info/dependency_links.txt
+anthropic_client_mojo.egg-info/requires.txt
+anthropic_client_mojo.egg-info/top_level.txt

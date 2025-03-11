@@ -1,0 +1,13 @@
+LICENSE
+README.md
+pyproject.toml
+setup.py
+src/python/anthropic_client/__init__.py
+src/python/anthropic_client/cli.py
+src/python/anthropic_client/client.py
+src/python/anthropic_client.egg-info/PKG-INFO
+src/python/anthropic_client.egg-info/SOURCES.txt
+src/python/anthropic_client.egg-info/dependency_links.txt
+src/python/anthropic_client.egg-info/entry_points.txt
+src/python/anthropic_client.egg-info/requires.txt
+src/python/anthropic_client.egg-info/top_level.txt
