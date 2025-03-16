@@ -106,8 +106,17 @@ def get_prompt_from_stdin() -> str:
     Raises:
         argparse.ArgumentError: If no prompt is provided.
     """
-    print("Enter your prompt (Ctrl+D to submit):", file=sys.stderr)
-    prompt = sys.stdin.read().strip()
+    print("Enter your prompt. Type ':submit' on a new line to submit:", file=sys.stderr)
+    lines = []
+    while True:
+        try:
+            line = input()
+        except EOFError:
+            break
+        if line.strip() == ":submit":
+            break
+        lines.append(line)
+    prompt = "\n".join(lines).strip()
     if not prompt:
         raise argparse.ArgumentError(None, "No prompt provided")
     return prompt

@@ -15,7 +15,7 @@ plugins {
     id 'checkstyle'
     id 'pmd'
     id 'jacoco'
-    id 'com.github.spotbugs' version '6.0.11'
+    id 'com.github.spotbugs' version '5.0.15'
     
 }
 
@@ -56,7 +56,7 @@ pmd {
 }
 
 spotbugs {
-    toolVersion = '6.0.11'
+    toolVersion = '5.0.15'
 }
 
 // Apply a specific Java toolchain to ease working on different environments.
