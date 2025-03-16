@@ -3,10 +3,11 @@ Name: anthropic-client
 Version: 0.1.0
 Summary: A Python client for interacting with Anthropic's Claude models
 Author: Ryan Oates
-Requires-Python: >=3.8
+Requires-Python: >=3.7
 Description-Content-Type: text/markdown
 License-File: LICENSE
 Requires-Dist: anthropic>=0.18.1
 Requires-Dist: python-dotenv>=1.0.0
+Dynamic: requires-python
 
  

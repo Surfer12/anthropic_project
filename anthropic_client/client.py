@@ -18,13 +18,14 @@ class ModelName(str, Enum):
     SONNET = "claude-3-7-sonnet-20250219"
     HAIKU = "claude-3-5-haiku-20241022"
     OPUS = "claude-3-opus-20240229"
-    # Custom OpenAI model
+    # Custom OpenAI models
     CUSTOM_GPT = "custom-openai-model-name"
+    O1_KOB_O3 = "o1-kob-o3"
 
     @property
     def provider(self) -> str:
         """Return the provider for this model."""
-        openai_models = ["custom-openai-model-name"]
+        openai_models = ["custom-openai-model-name", "o1-kob-o3"]
         return "openai" if self.value in openai_models else "anthropic"
 
 class OutputFormat(str, Enum):
