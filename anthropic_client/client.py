@@ -7,13 +7,7 @@ from enum import Enum
 from typing import Optional, Iterator, Union, List, Dict, Any
 import anthropic
 from dotenv import load_dotenv
-from openai import AgentsClient, OpenAI, AsyncOpenAI
-from openai.types.agent import Agent
-from openai.types.assistant import Assistant
-from openai.types.assistant_file import AssistantFile
-from openai.types.assistant_run import AssistantRun
-from openai.types.assistant_run_step import AssistantRunStep
-from openai.types.assistant_run_step_output import AssistantRunStepOutput
+from openai import OpenAI, AsyncClient
 import logging
 
 

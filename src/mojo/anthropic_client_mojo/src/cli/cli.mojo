@@ -7,7 +7,6 @@ import sys
 import time
 from python import Python, PythonObject
 
-from client import AnthropicClient
 
 fn create_parser() raises -> PythonObject:
     """Create and configure the argument parser."""
@@ -70,29 +69,29 @@ fn main() raises:
     
     # Get prompt from arguments or stdin
     var py_args = Python.evaluate("""
-    def get_prompt_from_args(args):
-        if args.prompt and len(args.prompt) > 0:
-            return ' '.join(args.prompt)
-        else:
-            import sys
-            sys.stderr.write("Enter your prompt (Ctrl+D to submit):\\n")
-            sys.stderr.flush()
-            try:
-                stdin_read = sys.stdin.read()
-                prompt = stdin_read.strip()
-                if not prompt:
-                    sys.stderr.write("Error: No prompt provided\\n")
-                    sys.exit(1)
-                return prompt
-            except KeyboardInterrupt:
-                sys.stderr.write("\\nOperation cancelled by user\\n")
+def get_prompt_from_args(args):
+    if args.prompt and len(args.prompt) > 0:
+        return ' '.join(args.prompt)
+    else:
+        import sys
+        sys.stderr.write("Enter your prompt (Ctrl+D to submit):\n")
+        sys.stderr.flush()
+        try:
+            stdin_read = sys.stdin.read()
+            prompt = stdin_read.strip()
+            if not prompt:
+                sys.stderr.write("Error: No prompt provided\n")
                 sys.exit(1)
-            except:
-                sys.stderr.write("Error: Failed to read input\\n")
-                sys.exit(1)
-    
-    get_prompt_from_args
-    """)
+            return prompt
+        except KeyboardInterrupt:
+            sys.stderr.write("\nOperation cancelled by user\n")
+            sys.exit(1)
+        except:
+            sys.stderr.write("Error: Failed to read input\n")
+            sys.exit(1)
+
+get_prompt_from_args
+""")
     
     prompt = String(py_args(args))
     
@@ -110,7 +109,7 @@ fn main() raises:
             load_dotenv()
             api_key = os.environ.get("ANTHROPIC_API_KEY")
             if not api_key:
-                sys.stderr.write("Error: ANTHROPIC_API_KEY environment variable not set\\n")
+                sys.stderr.write("Error: ANTHROPIC_API_KEY environment variable not set\n")
                 return False
                 
             # Create Anthropic client directly
@@ -139,7 +138,7 @@ fn main() raises:
                 # Non-streaming mode
                 response = client.beta.messages.create(**params)
                 response_text = response.content[0].text if response and response.content else "No response"
-                sys.stdout.write("Claude: " + response_text + "\\n")
+                sys.stdout.write("Claude: " + response_text + "\n")
                 return True
             else:
                 # Streaming mode (default)
@@ -157,11 +156,11 @@ fn main() raises:
                         sys.stdout.flush()
                         time.sleep(0.01)  # Small delay for smoother output
                 
-                sys.stdout.write("\\n")  # Final newline
+                sys.stdout.write("\n")  # Final newline
                 return True
                 
         except Exception as e:
-            sys.stderr.write(f"Error: {e}\\n")
+            sys.stderr.write(f"Error: {e}\n")
             return False
     
     run_client
