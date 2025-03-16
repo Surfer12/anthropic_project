@@ -21,11 +21,12 @@ class ModelName(str, Enum):
     # Custom OpenAI models
     CUSTOM_GPT = "custom-openai-model-name"
     O1_KOB_O3 = "o1-kob-o3"
+    GPT_4_5 = "gpt-4.5-preview-2025-02-27"
 
     @property
     def provider(self) -> str:
         """Return the provider for this model."""
-        openai_models = ["custom-openai-model-name", "o1-kob-o3"]
+        openai_models = ["custom-openai-model-name", "o1-kob-o3", "gpt-4.5-preview-2025-02-27"]
         return "openai" if self.value in openai_models else "anthropic"
 
 class OutputFormat(str, Enum):
@@ -90,7 +91,7 @@ class AnthropicClient:
         
     def get_response(
         self,
-        prompt: str,bbmojo
+        prompt: str,
         stream: bool = False,
         temperature: float = 1.0,
         model: Union[str, ModelName] = ModelName.SONNET,

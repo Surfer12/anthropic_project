@@ -1,0 +1,23 @@
+{
+  "model": "gpt-4.5-preview-2025-02-27",
+  "model_provider": "openai",
+  "endpoint": "https://api.openai.com/v1/chat/completions",
+  "headers": {
+    "Content-Type": "application/json"
+  },
+  "parameters": {
+    "temperature": 0.7,
+    "max_tokens": 4096,
+    "top_p": 1.0,
+    "frequency_penalty": 0.0,
+    "presence_penalty": 0.0
+  },
+  "text": {
+    "format": {
+      "type": "json_object"
+    }
+  },
+  "reasoning": {
+    "effort": "high"
+  }
+} 
