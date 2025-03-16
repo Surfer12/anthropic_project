@@ -1,40 +1,46 @@
-# Command Line Interface (CLI) Documentation
+# Anthropic Client CLI Documentation
 
-The `claudethink` command line interface provides a convenient way to interact with the Anthropic Claude API directly from your terminal.
+This comprehensive guide explains how to use the Anthropic Client Command Line Interface (CLI) for interacting with Claude models from Anthropic and custom OpenAI models through our unified interface.
 
 ## Installation
 
-The CLI is automatically installed when you install the package:
+Install the package to get access to the CLI:
 
 ```bash
-# Using Magic (recommended)
+# Using pip directly
+cd /path/to/anthropic_project
+pip install -e .
+
+# Using Magic (recommended for Mojo support)
 magic install
 magic run pip install -e .
-
-# Using pip directly
-pip install .
 ```
 
 ## Basic Usage
 
-The CLI supports several modes of operation:
+The CLI provides multiple ways to interact with AI models:
 
 ### Direct Prompts
 
-Send a prompt directly as a command line argument:
+Pass a prompt directly as a command-line argument:
 
 ```bash
-claudethink "What is the capital of France?"
+# Using the Python module interface
+python -m anthropic_client.cli "What is the capital of France?"
+
+# Using the Mojo implementation
+cd /path/to/anthropic_project/src/mojo/anthropic_client_mojo
+./claudethinkstream "What is the capital of France?"
 ```
 
-### Interactive Mode
+### Interactive Input
 
-Launch an interactive session where you can type multi-line prompts:
+When you run the CLI without a prompt, it will switch to interactive mode:
 
 ```bash
-claudethink
+python -m anthropic_client.cli
 # Type your prompt...
-# Press Ctrl+D (Unix) or Ctrl+Z (Windows) to submit
+# Press Enter twice to submit
 ```
 
 ### Pipe Mode
@@ -42,9 +48,9 @@ claudethink
 Read prompts from standard input:
 
 ```bash
-echo "What is the meaning of life?" | claudethink
+echo "What is the meaning of life?" | python -m anthropic_client.cli
 # or
-cat prompt.txt | claudethink
+cat prompt.txt | python -m anthropic_client.cli
 ```
 
 ## Command Options
@@ -52,15 +58,17 @@ cat prompt.txt | claudethink
 ### Core Options
 
 ```bash
-claudethink [OPTIONS] [PROMPT]
+python -m anthropic_client.cli [OPTIONS] [PROMPT]
 
 Options:
-  -ns, --no-stream   Disable streaming (streaming enabled by default)
-  -t, --temperature  Set response temperature (0.0 to 1.0, default: 1.0)
-  -b, --budget       Set thinking budget in tokens (1 to 128000, default: 128000)
-  -m, --model        Set model name (default: claude-3-5-sonnet-20240620)
-  -h, --help         Show this help message
-  -v, --version      Show version information
+  -ns, --no-stream     Disable streaming (streaming enabled by default)
+  -t, --temperature    Set response temperature (0.0 to 1.0, default: 1.0)
+  -m, --model          Select AI model
+  -f, --format         Output format: text, json, markdown
+  --system             Set system message/context
+  --haiku              Generate response in haiku format
+  --model-config       Path to custom model configuration
+  -h, --help           Show help message
 ```
 
 ### Response Control
@@ -68,51 +76,137 @@ Options:
 #### Streaming Mode
 Responses are streamed by default. Disable streaming with:
 ```bash
-claudethink -ns "Tell me a story"
-claudethink --no-stream "Tell me a story"
+python -m anthropic_client.cli -ns "Tell me a story"
+python -m anthropic_client.cli --no-stream "Tell me a story"
 ```
 
 #### Model Selection
-Choose a specific Claude model:
+Choose a specific model:
 ```bash
-claudethink -m claude-3-5-haiku-20241022 "Quick question"
-claudethink --model claude-3-7-sonnet-20250219 "Complex analysis"
+# Claude models
+python -m anthropic_client.cli -m claude-3-5-haiku-20241022 "Quick question"
+python -m anthropic_client.cli -m claude-3-7-sonnet-20250219 "Complex analysis"
+
+# Custom OpenAI models (if configured)
+python -m anthropic_client.cli -m gpt-4.5-preview-2025-02-27 "Compare LLM approaches"
+python -m anthropic_client.cli -m o1-kob-o3 "Creative writing task"
 ```
 
 #### Temperature Control
-Adjust response randomness (lower values = more focused):
+Adjust response randomness:
 ```bash
-claudethink -t 0.2 "Solve this math problem"
-claudethink --temperature 0.8 "Write a creative story"
+python -m anthropic_client.cli -t 0.2 "Solve this math problem"
+python -m anthropic_client.cli -t 1.0 "Write a creative story"
 ```
 
-#### Thinking Budget
-Control the token budget for thinking:
+#### Format Options
+Control the output format:
 ```bash
-claudethink -b 64000 "Summarize this text"
-claudethink --budget 32000 "Quick analysis"
+python -m anthropic_client.cli -f json "List 5 capital cities"
+python -m anthropic_client.cli -f markdown "Write documentation for a function"
+```
+
+## Enhanced Features
+
+### System Messages
+Set context or instructions for the model:
+```bash
+python -m anthropic_client.cli --system "You are a helpful math tutor." "Explain calculus"
+```
+
+### Haiku Mode
+Get responses in haiku format:
+```bash
+python -m anthropic_client.cli --haiku "Describe the ocean"
+```
+
+### Custom Model Configurations
+Use custom model definitions:
+```bash
+python -m anthropic_client.cli --model-config "/path/to/custom-model.json" "Your prompt"
 ```
 
 ## Environment Configuration
 
-The CLI respects the following environment variables:
+Control the CLI behavior through environment variables:
 
-- `ANTHROPIC_API_KEY`: Your Anthropic API key (required)
-- `CLAUDE_MODEL`: Override default model (optional)
-- `CLAUDE_TEMPERATURE`: Default temperature (optional)
-- `CLAUDE_THINKING_BUDGET`: Default thinking budget (optional)
+- `ANTHROPIC_API_KEY`: Your Anthropic API key (required for Anthropic models)
+- `OPENAI_API_KEY`: Your OpenAI API key (required for OpenAI models)
 
 These can be set in your `.env` file:
 ```bash
-ANTHROPIC_API_KEY=your_api_key_here
-CLAUDE_MODEL=claude-3-7-sonnet-20250219
-CLAUDE_TEMPERATURE=0.7
-CLAUDE_THINKING_BUDGET=64000
+ANTHROPIC_API_KEY=your_anthropic_api_key_here
+OPENAI_API_KEY=your_openai_api_key_here
 ```
 
 ## Examples
 
 ### Basic Examples
+
+```bash
+# Simple question with streaming (default)
+python -m anthropic_client.cli "What is the theory of relativity?"
+
+# Using the Haiku model for faster responses
+python -m anthropic_client.cli -m claude-3-5-haiku-20241022 "What are the primary colors?"
+
+# Generate a creative response
+python -m anthropic_client.cli "Write a short poem about artificial intelligence"
+
+# Get a structured JSON response
+python -m anthropic_client.cli -f json "List 5 programming languages with their creator and year"
+
+# Use the haiku mode
+python -m anthropic_client.cli --haiku "Describe autumn leaves"
+```
+
+### Advanced Examples
+
+```bash
+# Technical analysis with system prompt
+python -m anthropic_client.cli --system "You are an expert software engineer with deep knowledge of algorithms." "Explain the time complexity of quicksort"
+
+# Deterministic factual response (low temperature)
+python -m anthropic_client.cli -t 0.1 -m claude-3-7-sonnet-20250219 "List the planets in our solar system"
+
+# Creative writing (high temperature)
+python -m anthropic_client.cli -t 1.0 "Write a short science fiction story about AI"
+
+# Process input from a file
+cat article.txt | python -m anthropic_client.cli "Summarize this article in three bullet points"
+
+# Using a custom model configuration
+python -m anthropic_client.cli --model-config "custom-model.json" "Explain the difference between CNN and RNN"
+
+# Using Mojo for improved performance
+cd /path/to/anthropic_project/src/mojo/anthropic_client_mojo
+./claudethinkstream "Explain quantum computing to a five-year-old"
+```
+
+### Use Cases
+
+```bash
+# Code explanation
+python -m anthropic_client.cli "Explain what this code does:
+def quicksort(arr):
+    if len(arr) <= 1:
+        return arr
+    pivot = arr[len(arr) // 2]
+    left = [x for x in arr if x < pivot]
+    middle = [x for x in arr if x == pivot]
+    right = [x for x in arr if x > pivot]
+    return quicksort(left) + middle + quicksort(right)"
+
+# Data analysis
+python -m anthropic_client.cli -f json "Convert this data to JSON:
+Product, Price, Quantity
+Laptop, 1200, 5
+Phone, 800, 10
+Tablet, 300, 15"
+
+# Educational content
+python -m anthropic_client.cli -m claude-3-7-sonnet-20250219 "Create a short lesson plan for teaching photosynthesis to middle school students"
+```
 
 ```bash
 # Simple question (with default streaming)
