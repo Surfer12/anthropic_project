@@ -1,18 +1,44 @@
 from openai import OpenAI
 import os
 import json
+import requests
+import httpx
+import sys
+import ssl
+import certifi
+import logging
 
-# Get API key from environment variable or set it directly
+# Set up logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
+
+# Get API key from environment variable
 api_key = os.environ.get("OPENAI_API_KEY")
 if not api_key:
-    # Replace with your actual API key if not using environment variable
-    api_key = "your-api-key-here"  # Replace this with your actual API key
+    logger.error("OPENAI_API_KEY environment variable not set")
+    print("Error: OPENAI_API_KEY environment variable is required but not set.")
+    print("Please set the environment variable and try again.")
+    sys.exit(1)
+
+# Configure SSL context to use the certifi CA bundle
+ssl_context = ssl.create_default_context(cafile=certifi.where())
+httpx_client = httpx.Client(verify=ssl_context)
 
 print("Initializing OpenAI client...")
-client = OpenAI(api_key=api_key)
+try:
+    client = OpenAI(
+        api_key=api_key,
+        http_client=httpx_client
+    )
+    logger.info("OpenAI client initialized successfully")
+except Exception as e:
+    logger.error(f"Failed to initialize OpenAI client: {str(e)}")
+    print(f"Error initializing OpenAI client: {str(e)}")
+    sys.exit(1)
 
 print("Sending request to GPT-4.5-preview...")
-response = client.responses.create(
+try:
+    response = client.responses.create(
   model="gpt-4.5-preview-2025-02-27",
   input=[
     {
@@ -1585,14 +1611,47 @@ response = client.responses.create(
   top_p=0.11,
   store=True
 )
+    logger.info("API request completed successfully")
+    
+    print("\nRequest completed. Response received:")
+    print("----------------------------------------")
+    print(f"Model used: {response.model}")
+    print("Content:")
+    for message in response.messages:
+        if message.role == "assistant":
+            for content in message.content:
+                if content.type == "output_text":
+                    print(content.text[:300] + "..." if len(content.text) > 300 else content.text)
+    print("----------------------------------------")
 
-print("\nRequest completed. Response received:")
-print("----------------------------------------")
-print(f"Model used: {response.model}")
-print("Content:")
-for message in response.messages:
-    if message.role == "assistant":
-        for content in message.content:
-            if content.type == "output_text":
-                print(content.text[:300] + "..." if len(content.text) > 300 else content.text)
-print("----------------------------------------")
+except httpx.SSLError as ssl_err:
+    logger.error(f"SSL error occurred: {str(ssl_err)}")
+    print(f"\nSSL Error: {str(ssl_err)}")
+    print("This might be caused by certificate issues. Verify your system has up-to-date certificates.")
+    sys.exit(1)
+    
+except httpx.ConnectError as conn_err:
+    logger.error(f"Connection error: {str(conn_err)}")
+    print(f"\nConnection Error: {str(conn_err)}")
+    print("Could not connect to the OpenAI API. Please check your internet connection.")
+    sys.exit(1)
+    
+except httpx.TimeoutException as timeout_err:
+    logger.error(f"Request timed out: {str(timeout_err)}")
+    print(f"\nTimeout Error: {str(timeout_err)}")
+    print("The request took too long to complete. Please try again later.")
+    sys.exit(1)
+    
+except Exception as e:
+    logger.error(f"Error during API request: {str(e)}")
+    print(f"\nError: {str(e)}")
+    print("An error occurred while communicating with the OpenAI API.")
+    if hasattr(e, 'response') and hasattr(e.response, 'status_code'):
+        print(f"Status code: {e.response.status_code}")
+        if e.response.status_code == 401:
+            print("Authentication error: Check if your API key is valid.")
+        elif e.response.status_code == 429:
+            print("Rate limit exceeded: You've exceeded your rate limit or your organization's quota.")
+        elif e.response.status_code == 500:
+            print("Server error: OpenAI's servers encountered an error.")
+    sys.exit(1)
