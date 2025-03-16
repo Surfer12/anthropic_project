@@ -10,7 +10,8 @@ import os
 from pathlib import Path
 from typing import Optional, Iterator, NoReturn, TextIO
 import logging
-from .client import AnthropicClient, ModelName, OutputFormat
+from anthropic_client.client import AnthropicClient, ModelName, OutputFormat
+from anthropic_client.multi_provider_client import MultiProviderClient
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -193,28 +194,31 @@ def main() -> NoReturn:
             with open(args.model_config, 'r') as f:
                 model_config = json.load(f)
 
-        # Example: instantiating MultiProviderClient
-        from anthropic_client.multi_provider_client import MultiProviderClient
+        # Create multi-provider client
         client = MultiProviderClient()
         
         if args.no_stream:
-            handle_complete_response(
-                client,
+            response = client.get_response(
                 prompt,
-                args.temperature,
-                args.model,
-                args.format,
-                args.system
+                model=args.model,
+                temperature=args.temperature
             )
+            print("Response:", response)
         else:
-            handle_streaming_response(
-                client,
-                prompt,
-                args.temperature,
-                args.model,
-                args.format,
-                args.system
-            )
+            print("Response: ", end="", flush=True)
+            try:
+                for chunk in client.get_response(
+                    prompt,
+                    model=args.model,
+                    temperature=args.temperature,
+                    stream=True
+                ):
+                    print(chunk, end="", flush=True)
+                    time.sleep(STREAM_DELAY)
+                print()  # Final newline
+            except KeyboardInterrupt:
+                print("\nStreaming cancelled by user", file=sys.stderr)
+                raise
             
     except ValueError as e:
         logger.error(f"Validation error: {e}")

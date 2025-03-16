@@ -6,6 +6,7 @@
 npm install                                  # JavaScript dependencies
 pip install -e .                             # Python core
 magic install                                # Mojo/ML dependencies
+brew install ripgrep                         # ripgrep (rg) for enhanced file search (optional)
 
 # Gradle (Java/Spring)
 ./gradlew build                              # Build all projects
@@ -67,3 +68,21 @@ npx claude-code                              # Run Claude Code CLI
 - Mock external dependencies appropriately
 - Test both success and failure cases
 - Include edge cases and boundary conditions
+
+The project implements a flexible integration system allowing custom OpenAI models to be used alongside Anthropic's Claude models. Here's how it works:
+JSON Configuration Files: Each custom OpenAI model has a JSON configuration file (like gpt-4.5-preview.json and o1-kob-o3.json) that defines:
+Model name and provider
+API endpoint
+Request parameters
+Response formatting preferences
+ModelName Enum: The ModelName enum in client.py has been extended to include OpenAI models like GPT_4_5 and O1_KOB_O3 with a provider property that identifies them as OpenAI models.
+Model Configuration Loader: The model_config.py module loads model configurations from JSON files, searching in multiple locations including the package directory and user's home directory.
+MultiProviderClient: This client handles routing requests to either Anthropic or OpenAI based on the model type:
+It initializes connections to both Anthropic and OpenAI APIs
+The get_response method checks if the requested model is from OpenAI
+For OpenAI models, it uses the JSON configuration to make properly formatted API requests
+For Anthropic models, it uses the standard Anthropic client
+Usage Example: To use a custom OpenAI model:
+Apply
+)
+This architecture allows seamless switching between different AI providers while maintaining a consistent API interface. The code snippet from CLAUDE.md shows a simplified example of using this integration with GPT-4.5.

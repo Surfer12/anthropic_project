@@ -47,8 +47,28 @@ class MultiProviderClient:
             The response from the model.
         """
         model = kwargs.get("model", ModelName.SONNET)
+        
+        # Convert string to ModelName enum if it's a string
         if isinstance(model, str):
-            model = ModelName(model)
+            try:
+                model = ModelName(model)
+            except ValueError:
+                # If the string is not a valid enum value, just use it as is
+                model_name = model
+                # Default to anthropic provider if we can't determine
+                model_provider = "anthropic"
+                
+                # Try to determine provider from the model name pattern
+                if any(openai_model in model.lower() for openai_model in ["gpt", "o1-kob"]):
+                    model_provider = "openai"
+                
+                # Create a simple object with value and provider attributes
+                class SimpleModel:
+                    def __init__(self, value, provider):
+                        self.value = value
+                        self.provider = provider
+                
+                model = SimpleModel(model_name, model_provider)
             
         # Load custom model configuration if available
         model_config = load_model_config(model.value)
@@ -99,14 +119,17 @@ class MultiProviderClient:
         # You may adapt the following according to your Anthropic client specifics.
         # For example, reuse the existing get_response logic from the AnthropicClient.
         try:
+            # Get model and ensure we get the string value
+            model = kwargs.get("model", ModelName.SONNET)
+            model_value = model.value if hasattr(model, 'value') else model
+            
             message_params = {
-                "model": kwargs.get("model", ModelName.SONNET).value,
+                "model": model_value,
                 "max_tokens": kwargs.get("max_tokens", 128000),
                 "temperature": kwargs.get("temperature", 1.0),
                 "messages": [{"role": "user", "content": prompt}],
                 "thinking": {"type": "enabled", "budget_tokens": 120000},
-                "betas": ["output-128k-2025-02-19"],
-                "citations": {"enabled": True}
+                "betas": ["output-128k-2025-02-19"]
             }
             
             if kwargs.get("stream", False):
