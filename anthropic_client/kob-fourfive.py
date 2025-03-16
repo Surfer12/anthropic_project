@@ -1,5 +1,6 @@
 from openai import OpenAI
 import os
+import json
 
 # Get API key from environment variable or set it directly
 api_key = os.environ.get("OPENAI_API_KEY")
@@ -7,8 +8,10 @@ if not api_key:
     # Replace with your actual API key if not using environment variable
     api_key = "your-api-key-here"  # Replace this with your actual API key
 
+print("Initializing OpenAI client...")
 client = OpenAI(api_key=api_key)
 
+print("Sending request to GPT-4.5-preview...")
 response = client.responses.create(
   model="gpt-4.5-preview-2025-02-27",
   input=[
@@ -1582,3 +1585,14 @@ response = client.responses.create(
   top_p=0.11,
   store=True
 )
+
+print("\nRequest completed. Response received:")
+print("----------------------------------------")
+print(f"Model used: {response.model}")
+print("Content:")
+for message in response.messages:
+    if message.role == "assistant":
+        for content in message.content:
+            if content.type == "output_text":
+                print(content.text[:300] + "..." if len(content.text) > 300 else content.text)
+print("----------------------------------------")
