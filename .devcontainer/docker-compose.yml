@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ..:/workspaces:cached
+      # This is crucial for Docker-outside-of-Docker:
+      - /var/run/docker.sock:/var/run/docker.sock
+    #privileged: true  # You may or may not need this. Try without first.
+
+    # Overrides default command so things don't shut down after the process ends.
+    command: sleep infinity
+
+    # Uncomment the next four lines if you want to use Docker-in-Docker (DIND).  This is *different* from Docker-outside-of-Docker.
+    # environment:
+    #   - DOCKER_HOST=tcp://docker:2375
+    # depends_on:
+    #   - docker
+
+  # Only needed for Docker-in-Docker (DIND), *not* Docker-outside-of-Docker.
+  # docker:
+  #   image: docker:dind
+  #   privileged: true
+
+networks:
+  default:
+    name: devcontainer_default
+    external: true 
