@@ -1,18 +1,13 @@
-<<<<<<< HEAD
-python {
-    pip {
-        install "pytest:8.3.3" // Updated to the latest stable version of pytest as of writing.
-    }
-}
-=======
 plugins {
     id 'com.linkedin.python' version '0.9.17'
 }
 
 python {
     pip {
-        install "pytest:8.2.0"
-        install "requests:2.31.0"
+        install "pytest:8.3.3"  // Latest stable version
+        install "requests:2.32.3"  // Latest stable version
+        install "openai:1.66.3"  // Latest stable version
+        install "httpx:0.28.1"  // Latest stable version
+        install "certifi:2025.1.31"  // Latest stable version
     }
-} 
->>>>>>> ae54c7e (Update Gradle build artifacts and problem report)
+}

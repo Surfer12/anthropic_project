@@ -2,12 +2,16 @@ Metadata-Version: 2.2
 Name: anthropic-client
 Version: 0.1.0
 Summary: A Python client for interacting with Anthropic's Claude models
+Home-page: https://github.com/surfer12/anthropic_project
 Author: Ryan Oates
-Requires-Python: >=3.7
+Author-email: ryanoatsie@outlook.com
+Requires-Python: >=3.12
 Description-Content-Type: text/markdown
 License-File: LICENSE
 Requires-Dist: anthropic<0.50,>=0.49.0
 Requires-Dist: python-dotenv<2,>=1.0.1
+Dynamic: author-email
+Dynamic: home-page
 Dynamic: requires-python
 
  

@@ -131,7 +131,7 @@ packages:
 - pypi: .
   name: anthropic-client
   version: 0.1.0
-  sha256: 4612af85bdd69689455e448a8bd7487395ed7408bf27417ac2a7c214bdd9386e
+  sha256: bd0c68228c1f89a044e2a4fae63df2babd24539ef380ad34e364867808aac6be
   requires_dist:
   - anthropic
   - python-dotenv
@@ -329,7 +329,8 @@ packages:
   - certifi
   license: BSD-3-Clause
   license_family: BSD
-  purls: []
+  purls:
+  - pkg:pypi/httpcore?source=hash-mapping
   size: 48959
   timestamp: 1731707562362
 - conda: https://conda.anaconda.org/conda-forge/noarch/httpx-0.28.1-pyhd8ed1ab_0.conda

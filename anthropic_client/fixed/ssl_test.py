@@ -12,7 +12,6 @@ print("=== SSL Certificate Diagnostic Tool ===")
 # Check SSL version
 print(f"\n1. SSL Version Information:")
 print(f"OpenSSL Version: {ssl.OPENSSL_VERSION}")
-print(f"SSL Version: {ssl._ssl.__version__}")
 print(f"Default SSL Context: {ssl.create_default_context()}")
 
 # Check certifi
