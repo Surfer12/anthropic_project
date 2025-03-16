@@ -6,12 +6,28 @@ import os
 import json
 import logging
 from dotenv import load_dotenv
-from typing import Any, Dict, Iterator, Union
+from typing import Any, Dict, Iterator, Union, List, Optional
 import anthropic
 from anthropic_client.client import ModelName, OutputFormat  # Assumes OutputFormat is defined in client.py
 from anthropic_client.model_config import load_model_config
 
 logger = logging.getLogger(__name__)
+
+# Dictionary of known model capabilities
+MODEL_CAPABILITIES = {
+    "claude-3-5-haiku-20241022": {
+        "supports_thinking": False,
+        "supports_streaming": True
+    },
+    "claude-3-7-sonnet-20250219": {
+        "supports_thinking": True,
+        "supports_streaming": True
+    },
+    "claude-3-opus-20240229": {
+        "supports_thinking": True,
+        "supports_streaming": True
+    }
+}
 
 class MultiProviderClient:
     """Client for interacting with multiple model providers."""
@@ -77,6 +93,24 @@ class MultiProviderClient:
             return self._get_openai_response(prompt, model_config, **kwargs)
         else:
             return self._get_anthropic_response(prompt, **kwargs)
+    
+    def _check_model_capabilities(self, model_value: str) -> Dict[str, bool]:
+        """Check the capabilities of a given model.
+        
+        Args:
+            model_value: The model identifier string.
+            
+        Returns:
+            Dictionary with capability flags.
+        """
+        # Default capabilities (assume most features are supported)
+        default_capabilities = {
+            "supports_thinking": True,
+            "supports_streaming": True
+        }
+        
+        # Return known capabilities or defaults
+        return MODEL_CAPABILITIES.get(model_value, default_capabilities)
             
     def _get_openai_response(self, prompt: str, model_config: Dict[str, Any], **kwargs) -> Any:
         """Handle OpenAI API calls using the given model configuration.
@@ -113,31 +147,85 @@ class MultiProviderClient:
             raise
 
     def _get_anthropic_response(self, prompt: str, **kwargs) -> Any:
-        """Handle Anthropic API calls."""
+        """Handle Anthropic API calls with capability detection and fallback."""
         if not self.anthropic_client:
             raise ValueError("ANTHROPIC_API_KEY is not set")
-        # You may adapt the following according to your Anthropic client specifics.
-        # For example, reuse the existing get_response logic from the AnthropicClient.
+        
+        # Get model and ensure we get the string value
+        model = kwargs.get("model", ModelName.SONNET)
+        model_value = model.value if hasattr(model, 'value') else model
+        
+        # Check model capabilities
+        capabilities = self._check_model_capabilities(model_value)
+        
+        # Determine if we should use streaming
+        use_streaming = kwargs.get("stream", False)
+        
+        # Determine if we should use thinking (based on model capabilities)
+        use_thinking = capabilities["supports_thinking"]
+        
+        # Build base message parameters
+        message_params = {
+            "model": model_value,
+            "max_tokens": kwargs.get("max_tokens", 128000),
+            "temperature": kwargs.get("temperature", 1.0),
+            "messages": [{"role": "user", "content": prompt}],
+            "betas": ["output-128k-2025-02-19"]
+        }
+        
+        # Add system message if provided
+        if "system" in kwargs and kwargs["system"]:
+            message_params["messages"].insert(0, {"role": "system", "content": kwargs["system"]})
+        
+        # Add thinking if supported and not explicitly disabled
+        if use_thinking and kwargs.get("thinking", True):
+            thinking_budget = kwargs.get("thinking_budget", 120000)
+            message_params["thinking"] = {"type": "enabled", "budget_tokens": thinking_budget}
+        
+        # Try streaming if requested and supported
+        if use_streaming and capabilities["supports_streaming"]:
+            try:
+                return self._stream_anthropic_response(message_params)
+            except Exception as e:
+                logger.warning(f"Streaming failed, falling back to non-streaming: {str(e)}")
+                # Fall back to non-streaming
+                return self._batch_anthropic_response(message_params)
+        else:
+            # Use non-streaming by default
+            return self._batch_anthropic_response(message_params)
+    
+    def _stream_anthropic_response(self, message_params: Dict[str, Any]) -> Iterator[str]:
+        """Handle streaming Anthropic API calls.
+        
+        Args:
+            message_params: The message parameters to send.
+            
+        Returns:
+            An iterator of response chunks.
+        """
         try:
-            # Get model and ensure we get the string value
-            model = kwargs.get("model", ModelName.SONNET)
-            model_value = model.value if hasattr(model, 'value') else model
-            
-            message_params = {
-                "model": model_value,
-                "max_tokens": kwargs.get("max_tokens", 128000),
-                "temperature": kwargs.get("temperature", 1.0),
-                "messages": [{"role": "user", "content": prompt}],
-                "thinking": {"type": "enabled", "budget_tokens": 120000},
-                "betas": ["output-128k-2025-02-19"]
-            }
-            
-            if kwargs.get("stream", False):
-                response = self.anthropic_client.beta.messages.create(**message_params, stream=True)
-                return (chunk.content[0].text for chunk in response)
-            else:
-                response = self.anthropic_client.beta.messages.create(**message_params)
-                return response.content[0].text
+            response = self.anthropic_client.beta.messages.create(**message_params, stream=True)
+            # Extract text from each chunk's content
+            return (chunk.delta.text for chunk in response if hasattr(chunk, 'delta') and hasattr(chunk.delta, 'text'))
         except Exception as e:
-            logger.error(f"Error calling Anthropic: {str(e)}")
+            logger.error(f"Error in streaming response: {str(e)}")
+            raise
+    
+    def _batch_anthropic_response(self, message_params: Dict[str, Any]) -> str:
+        """Handle non-streaming (batch) Anthropic API calls.
+        
+        Args:
+            message_params: The message parameters to send.
+            
+        Returns:
+            The complete response as a string.
+        """
+        try:
+            response = self.anthropic_client.beta.messages.create(**message_params)
+            # Extract text from the response content
+            if hasattr(response, 'content') and len(response.content) > 0:
+                return response.content[0].text
+            return ""
+        except Exception as e:
+            logger.error(f"Error in batch response: {str(e)}")
             raise 

@@ -189,45 +189,85 @@ def main() -> NoReturn:
         # Get prompt from arguments or stdin
         prompt = " ".join(args.prompt) if args.prompt else get_prompt_from_stdin()
 
+        # Load optional model configuration
         model_config = None
         if args.model_config:
-            with open(args.model_config, 'r') as f:
-                model_config = json.load(f)
+            try:
+                with open(args.model_config, 'r') as f:
+                    model_config = json.load(f)
+                logger.info(f"Loaded model configuration from {args.model_config}")
+            except Exception as e:
+                logger.warning(f"Failed to load model configuration: {e}")
 
         # Create multi-provider client
         client = MultiProviderClient()
         
-        if args.no_stream:
-            response = client.get_response(
-                prompt,
-                model=args.model,
-                temperature=args.temperature
-            )
-            print("Response:", response)
-        else:
-            print("Response: ", end="", flush=True)
-            try:
-                for chunk in client.get_response(
-                    prompt,
-                    model=args.model,
-                    temperature=args.temperature,
-                    stream=True
-                ):
-                    print(chunk, end="", flush=True)
-                    time.sleep(STREAM_DELAY)
-                print()  # Final newline
-            except KeyboardInterrupt:
-                print("\nStreaming cancelled by user", file=sys.stderr)
-                raise
+        # Prepare request parameters
+        request_params = {
+            "model": args.model,
+            "temperature": args.temperature,
+            "format": args.format
+        }
+        
+        # Add system prompt if provided
+        if args.system:
+            request_params["system"] = args.system
+            
+        # Handle haiku mode (special system prompt)
+        if args.haiku:
+            request_params["system"] = "You are Claude, an AI assistant that specializes in writing short, elegant haikus. Respond only with a haiku in 3-5-3 syllable format."
+        
+        # Set streaming mode based on args
+        streaming_mode = not args.no_stream
+        request_params["stream"] = streaming_mode
+        
+        try:
+            if streaming_mode:
+                # Stream mode
+                print("Response: ", end="", flush=True)
+                try:
+                    for chunk in client.get_response(prompt, **request_params):
+                        print(chunk, end="", flush=True)
+                        time.sleep(STREAM_DELAY)
+                    print()  # Final newline
+                except KeyboardInterrupt:
+                    print("\nStreaming cancelled by user", file=sys.stderr)
+                    raise
+                except Exception as e:
+                    print(f"\nStreaming error: {e}", file=sys.stderr)
+                    logger.warning(f"Streaming failed, falling back to non-streaming: {e}")
+                    
+                    # Fall back to non-streaming mode
+                    print("\nFalling back to non-streaming mode...", file=sys.stderr)
+                    request_params["stream"] = False
+                    response = client.get_response(prompt, **request_params)
+                    print("Response:", response)
+            else:
+                # Non-streaming mode
+                response = client.get_response(prompt, **request_params)
+                print("Response:", response)
+                
+            # If we have an output file path, save the conversation
+            if args.save_conversation:
+                # Implement conversation saving logic
+                pass
+                
+        except Exception as e:
+            logger.error(f"Error getting response: {e}")
+            print(f"Error: {e}", file=sys.stderr)
+            sys.exit(1)
             
     except ValueError as e:
         logger.error(f"Validation error: {e}")
+        print(f"Error: {e}", file=sys.stderr)
         sys.exit(1)
     except KeyboardInterrupt:
         logger.info("Operation cancelled by user")
+        print("\nOperation cancelled by user", file=sys.stderr)
         sys.exit(1)
     except Exception as e:
         logger.error(f"An unexpected error occurred: {e}")
+        print(f"Unexpected error: {e}", file=sys.stderr)
         sys.exit(1)
 
 if __name__ == "__main__":
