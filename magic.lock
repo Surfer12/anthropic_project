@@ -120,7 +120,7 @@ packages:
 - pypi: .
   name: anthropic-client
   version: 0.1.0
-  sha256: 0d6cf4c40a237ac225371c822d3d0353e984b6341408de001bbefa62262a1f46
+  sha256: f84500c024070716409848690395f7793d8ddfc9875481a231b0159d5348c9c9
   requires_dist:
   - anthropic>=0.49.0,<0.50
   - python-dotenv>=1.0.1,<2
