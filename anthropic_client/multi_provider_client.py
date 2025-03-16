@@ -135,13 +135,55 @@ class MultiProviderClient:
         
         # This is a placeholder for making an API call to OpenAI's endpoint.
         try:
-            response = self.openai_client.ChatCompletion.create(
-                model=model_name,
-                messages=[{"role": "user", "content": prompt}],
-                temperature=temperature,
-                **parameters
-            )
-            return response.choices[0].message.get("content", "")
+            # Handle the custom "responses" endpoint differently than standard OpenAI endpoints
+            if endpoint and "/responses" in endpoint:
+                import requests
+                # Set up direct API request
+                api_key = os.environ.get("OPENAI_API_KEY")
+                headers = {
+                    "Content-Type": "application/json",
+                    "Authorization": f"Bearer {api_key}"
+                }
+                
+                # Prepare request payload
+                payload = {
+                    "model": model_name,
+                    "input": prompt,
+                    **parameters
+                }
+                
+                # Make direct API request
+                response = requests.post(endpoint, headers=headers, json=payload)
+                response_json = response.json()
+                
+                # Extract content from the response
+                if response_json and "output" in response_json:
+                    return response_json["output"]
+                else:
+                    logger.error(f"Invalid response format: {response_json}")
+                    return "Error: Invalid response format"
+            else:
+                # Use standard OpenAI client for normal endpoints
+                response = self.openai_client.ChatCompletion.create(
+                    model=model_name,
+                    messages=[{"role": "user", "content": prompt}],
+                    temperature=temperature,
+                    **parameters
+                )
+                
+                # Check if response and response.choices exist
+                if not response or not hasattr(response, 'choices') or not response.choices:
+                    logger.error("Invalid response format from OpenAI API")
+                    return "Error: Invalid response format"
+                    
+                # Check if choice.message exists
+                choice = response.choices[0]
+                if not hasattr(choice, 'message') or not choice.message:
+                    logger.error("Response missing message attribute")
+                    return "Error: Response missing message attribute"
+                    
+                # Safely get content from message
+                return choice.message.get("content", "")
         except Exception as e:
             logger.error(f"Error calling OpenAI: {str(e)}")
             raise

@@ -13,7 +13,7 @@ fn main() raises:
     
     print("--- CLI Usage Options ---")
     var show_help = Python.evaluate("""
-    lambda: print('''
+lambda: print('''
     Usage Modes:
     1. Standard Interaction:
        python python_cli.py 'Your prompt here'
@@ -30,7 +30,7 @@ fn main() raises:
       -t, --temperature  Set response temperature (0.0-1.0)
       -d, --dry-run      Test mode without API calls
     ''')
-    """)
+""")
     show_help()
     
     print("\n--- Quick Start ---")
