@@ -89,6 +89,11 @@ def create_parser() -> argparse.ArgumentParser:
         metavar="FILENAME",
         help="Load a conversation from a JSON file"
     )
+    parser.add_argument(
+        "--model-config",
+        type=str,
+        help="Path to a JSON file containing model configuration"
+    )
     return parser
 
 def get_prompt_from_stdin() -> str:
@@ -183,7 +188,14 @@ def main() -> NoReturn:
         # Get prompt from arguments or stdin
         prompt = " ".join(args.prompt) if args.prompt else get_prompt_from_stdin()
 
-        client = AnthropicClient()
+        model_config = None
+        if args.model_config:
+            with open(args.model_config, 'r') as f:
+                model_config = json.load(f)
+
+        # Example: instantiating MultiProviderClient
+        from anthropic_client.multi_provider_client import MultiProviderClient
+        client = MultiProviderClient()
         
         if args.no_stream:
             handle_complete_response(
