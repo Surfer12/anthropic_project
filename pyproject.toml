@@ -44,3 +44,4 @@ anthropic-client = { path = ".", editable = true }
 [tool.pixi.dependencies]
 max = ">=25.2.0.dev2025031605,<26"
 openai = ">=1.66.3,<2"
+gradle = ">=8.11.1,<9"

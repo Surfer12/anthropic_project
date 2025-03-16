@@ -19,6 +19,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/colorama-0.4.6-pyhd8ed1ab_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/distro-1.9.0-pyhd8ed1ab_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/exceptiongroup-1.2.2-pyhd8ed1ab_1.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/gradle-8.11.1-h707e725_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/h11-0.14.0-pyhd8ed1ab_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/h2-4.2.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/hpack-4.1.0-pyhd8ed1ab_0.conda
@@ -58,6 +59,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/ncurses-6.5-h5e97a16_3.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/numpy-1.26.4-py312h8442bc7_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/openai-1.66.3-pyhd8ed1ab_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/osx-arm64/openjdk-22.0.1-h363fedd_1.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/openssl-3.4.1-h81ee809_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/packaging-24.2-pyhd8ed1ab_2.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/pathspec-0.12.1-pyhd8ed1ab_1.conda
@@ -118,7 +120,7 @@ packages:
 - pypi: .
   name: anthropic-client
   version: 0.1.0
-  sha256: 1dc4e8075368911e731e78e012df21214aba3088f1ffeae09d9cbad65668073a
+  sha256: 0d6cf4c40a237ac225371c822d3d0353e984b6341408de001bbefa62262a1f46
   requires_dist:
   - anthropic>=0.49.0,<0.50
   - python-dotenv>=1.0.1,<2
@@ -213,6 +215,17 @@ packages:
   - pkg:pypi/exceptiongroup?source=hash-mapping
   size: 20486
   timestamp: 1733208916977
+- conda: https://conda.anaconda.org/conda-forge/noarch/gradle-8.11.1-h707e725_0.conda
+  sha256: f915593b543c4156d0d9dce05e0056975482ae25b1637cb5830efaeb4bffb78a
+  md5: b0d211f827e1827cafe15b4000500223
+  depends:
+  - __unix
+  - openjdk >=8,<23
+  license: Apache-2.0
+  license_family: APACHE
+  purls: []
+  size: 134432899
+  timestamp: 1732134820391
 - conda: https://conda.anaconda.org/conda-forge/noarch/h11-0.14.0-pyhd8ed1ab_1.conda
   sha256: 622516185a7c740d5c7f27016d0c15b45782c1501e5611deec63fd70344ce7c8
   md5: 7ee49e89531c0dcbba9466f6d115d585
@@ -746,6 +759,18 @@ packages:
   - pkg:pypi/openai?source=hash-mapping
   size: 246003
   timestamp: 1741872687638
+- conda: https://conda.anaconda.org/conda-forge/osx-arm64/openjdk-22.0.1-h363fedd_1.conda
+  sha256: 264b338a2a8248c889daa3a23a4e0dc9ce7993901c3cc9758fae2d6b107e697f
+  md5: 9a063c97afe39a816ed57e57244c6e82
+  depends:
+  - libzlib >=1.3.1,<2.0a0
+  arch: arm64
+  platform: osx
+  license: GPL-2.0-or-later WITH Classpath-exception-2.0
+  license_family: GPL
+  purls: []
+  size: 175210961
+  timestamp: 1721718308183
 - conda: https://conda.anaconda.org/conda-forge/osx-arm64/openssl-3.4.1-h81ee809_0.conda
   sha256: 4f8e2389e1b711b44182a075516d02c80fa7a3a7e25a71ff1b5ace9eae57a17a
   md5: 75f9f0c7b1740017e2db83a53ab9a28e

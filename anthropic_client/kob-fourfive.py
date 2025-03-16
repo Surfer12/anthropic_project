@@ -1,5 +1,13 @@
 from openai import OpenAI
-client = OpenAI()
+import os
+
+# Get API key from environment variable or set it directly
+api_key = os.environ.get("OPENAI_API_KEY")
+if not api_key:
+    # Replace with your actual API key if not using environment variable
+    api_key = "your-api-key-here"  # Replace this with your actual API key
+
+client = OpenAI(api_key=api_key)
 
 response = client.responses.create(
   model="gpt-4.5-preview-2025-02-27",
