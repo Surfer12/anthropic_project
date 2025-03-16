@@ -208,115 +208,115 @@ Tablet, 300, 15"
 python -m anthropic_client.cli -m claude-3-7-sonnet-20250219 "Create a short lesson plan for teaching photosynthesis to middle school students"
 ```
 
-```bash
-# Simple question (with default streaming)
-claudethink "What is the capital of France?"
+## Error Handling and Troubleshooting
 
-# Multi-line input
-claudethink "Please analyze this code:
-def hello():
-    print('Hello, World!')
-"
+The CLI includes robust error handling to help diagnose and resolve issues:
 
-# Disable streaming
-claudethink -ns "Write a short story about a robot"
-
-# Use Haiku model for faster responses
-claudethink -m claude-3-5-haiku-20241022 "Quick fact check"
-
-# Technical analysis with low temperature
-claudethink -t 0.2 "Explain how TCP/IP works"
-
-# With citations enabled (default)
-claudethink "Explain quantum computing"
-```
-
-### Advanced Usage
+### Common Errors
 
 ```bash
-# Pipe file contents
-cat code.py | claudethink "Review this code and suggest improvements"
-
-# Process multiple prompts
-cat prompts.txt | while read prompt; do
-    claudethink "$prompt" >> responses.txt
-done
-
-# Interactive session (with default streaming)
-claudethink
-
-# Use specific script for Haiku model
-claudethinkhaiku "What's the fastest mammal?"
-```
-
-## Error Handling
-
-The CLI provides clear error messages for common issues:
-
-- Missing API key
-- Invalid temperature values
-- Network connectivity problems
-- API rate limiting
-- Invalid prompts
-- Insufficient thinking budget
-
-Example error messages:
-```bash
+# API Key not set
 Error: ANTHROPIC_API_KEY environment variable not set
+
+# Invalid temperature value
 Error: Temperature must be between 0.0 and 1.0
-Error: API request failed: rate limit exceeded
+
+# Model capability mismatch
+Streaming failed, falling back to non-streaming
+
+# Network issues
+Error: API Connection Error: Failed to establish connection
 ```
 
-## Best Practices
-
-1. **Use Temperature Appropriately**
-   - Low (0.1-0.3) for factual/analytical tasks
-   - Medium (0.4-0.7) for balanced responses
-   - High (0.8-1.0) for creative tasks
-
-2. **Optimize Thinking Budget**
-   - Use lower budgets for simple queries
-   - Increase budget for complex analysis
-   - Monitor token usage in responses
-
-3. **Streaming Options**
-   - Streaming is on by default for real-time responses
-   - Disable streaming (-ns flag) for scripted usage
-   - Use specialized scripts (claudethinkhaiku, etc.) for specific models
-
-4. **Input Handling**
-   - Use quotes for prompts with spaces
-   - Use heredocs for multi-line input
-   - Consider file input for long prompts
-
-## Troubleshooting
-
-Common issues and solutions:
+### Troubleshooting Steps
 
 1. **API Key Issues**
-   - Ensure ANTHROPIC_API_KEY is set
-   - Check key validity
-   - Verify environment file loading
+   - Ensure your API keys are properly set in the environment or `.env` file
+   - Check that you're using the correct API key for the selected model provider
 
-2. **Rate Limiting**
-   - Implement backoff in scripts
-   - Monitor usage patterns
-   - Consider batch processing
+2. **Model Selection Problems**
+   - Verify that you're using a valid model name (use `--help` to see options)
+   - Some features may not be available for all models (the client will adapt automatically)
 
-3. **Network Problems**
-   - Check internet connectivity
-   - Verify proxy settings
-   - Ensure API endpoint access
+3. **Network Issues**
+   - Check your internet connection
+   - Verify that you're not behind a restrictive firewall
+   - Consider using a VPN if you're in a region with API access limitations
 
-4. **Response Issues**
-   - Verify prompt formatting
-   - Check temperature settings
-   - Monitor thinking budget
+4. **Streaming Problems**
+   - If streaming fails, the client will automatically fall back to batch mode
+   - Try using the `--no-stream` flag explicitly if you encounter persistent issues
 
-## Support
+## Working with Model Configurations
 
-For additional help:
-- Check the project README
-- Review CLAUDE.md for development guidelines
-- Submit issues on the project repository
-- Contact the maintainers 
+Custom model configurations allow you to define and use your own model settings or integrate with other API providers.
+
+### Configuration Format
+
+Model configurations are JSON files that specify model parameters:
+
+```json
+{
+  "model": "your-model-name",
+  "model_provider": "openai",
+  "endpoint": "https://api.example.com/v1/chat/completions",
+  "parameters": {
+    "temperature": 0.7,
+    "max_tokens": 1000
+  },
+  "headers": {
+    "Custom-Header": "custom-value"
+  }
+}
+```
+
+### Using Configurations
+
+```bash
+# Create a custom model configuration
+echo '{
+  "model": "custom-model",
+  "model_provider": "openai",
+  "temperature": 0.5
+}' > custom-model.json
+
+# Use the configuration
+python -m anthropic_client.cli --model-config custom-model.json "Your prompt here"
+```
+
+## Advanced CLI Features
+
+### Mojo CLI Options
+
+The Mojo implementation offers specialized scripts for different use cases:
+
+```bash
+# Standard streaming interaction
+./claudethinkstream "Your prompt here"
+
+# Test mode without making API calls
+./claudethinkdry "Your prompt here"
+
+# Fast response mode (uses optimized settings)
+./claudethinkfast "Your prompt here"
+```
+
+### Batch Processing
+
+Process multiple prompts efficiently:
+
+```bash
+# Process a list of prompts from a file
+cat prompts.txt | while read prompt; do
+  python -m anthropic_client.cli "$prompt" >> responses.txt
+done
+```
+
+## Conclusion
+
+The Anthropic Client CLI provides a flexible and powerful interface for interacting with Claude and other AI models. With support for multiple providers, streaming responses, format control, and robust error handling, it's a versatile tool for a wide range of AI-powered tasks.
+
+For more information, refer to the other documents in the project:
+- `/docs/guides/DEVELOPMENT.md`: For contributing to the project
+- `/docs/guides/TECHNICAL.md`: For technical details about the implementation
+- `/docs/guides/USERGUIDE.md`: For a comprehensive user guide
