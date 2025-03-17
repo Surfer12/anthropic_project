@@ -47,7 +47,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/charset-normalizer-3.4.1-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/click-8.1.8-pyh707e725_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/colorama-0.4.6-pyhd8ed1ab_1.conda
-      - conda: https://conda.anaconda.org/conda-forge/osx-arm64/coverage-7.6.12-py312h998013c_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/osx-arm64/coverage-7.7.0-py312h998013c_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/cpython-3.12.9-py312hd8ed1ab_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/datasets-2.14.4-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/dill-0.3.7-pyhd8ed1ab_0.conda
@@ -741,9 +741,9 @@ packages:
   - pkg:pypi/colorama?source=hash-mapping
   size: 27011
   timestamp: 1733218222191
-- conda: https://conda.anaconda.org/conda-forge/osx-arm64/coverage-7.6.12-py312h998013c_0.conda
-  sha256: a454920f1f94e2b91758bede99ddd47a5088a9308c1115229feb12c3f8067b71
-  md5: fec293a818e0efc2d4815347ca49cebb
+- conda: https://conda.anaconda.org/conda-forge/osx-arm64/coverage-7.7.0-py312h998013c_0.conda
+  sha256: 54f4c61f12caa277b2555080b03ab320fc342f1295d01254498adcfdd012292f
+  md5: 5021d17d7b543fa94744ba18a13bca16
   depends:
   - __osx >=11.0
   - python >=3.12,<3.13.0a0
@@ -751,11 +751,10 @@ packages:
   - python_abi 3.12.* *_cp312
   - tomli
   license: Apache-2.0
-  license_family: APACHE
   purls:
   - pkg:pypi/coverage?source=hash-mapping
-  size: 366049
-  timestamp: 1739302123508
+  size: 369999
+  timestamp: 1742157070531
 - conda: https://conda.anaconda.org/conda-forge/noarch/cpython-3.12.9-py312hd8ed1ab_1.conda
   noarch: generic
   sha256: 58a637bc8328b115c9619de3fcd664ec26662083319e3c106917a1b3ee4d7594
