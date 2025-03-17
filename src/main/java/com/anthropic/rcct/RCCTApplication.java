@@ -2,16 +2,17 @@ package com.anthropic.rcct;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.Bean;
-import com.anthropic.rcct.model.CCTModel;
+import org.springframework.boot.autoconfigure.domain.EntityScan;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 /**
- * Main application class for the Recursive Cognitive Chain of Thought (RCCT) system.
- * 
- * This Spring Boot application provides a platform for creating, analyzing, and visualizing
- * cognitive chains of thought through recursive processing and meta-cognitive operations.
+ * Main application class for the Recursive Chain of Thought (RCCT) framework.
+ * This Spring Boot application implements a cross-domain integration between
+ * computational, cognitive, and representational systems.
  */
 @SpringBootApplication
+@EntityScan(basePackages = "com.anthropic.rcct.model")
+@EnableJpaRepositories(basePackages = "com.anthropic.rcct.repository")
 public class RCCTApplication {
 
     /**
@@ -21,15 +22,5 @@ public class RCCTApplication {
      */
     public static void main(String[] args) {
         SpringApplication.run(RCCTApplication.class, args);
-    }
-    
-    /**
-     * Creates and configures the main CCT model bean for the application.
-     * 
-     * @return A new instance of CCTModel to be used throughout the application
-     */
-    @Bean
-    public CCTModel cctModel() {
-        return new CCTModel();
     }
 }

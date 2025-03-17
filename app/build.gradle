@@ -16,7 +16,6 @@ plugins {
     id 'pmd'
     id 'jacoco'
     id 'com.github.spotbugs' version '5.0.15'
-    
 }
 
 repositories {
@@ -35,6 +34,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
     implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'io.projectreactor:reactor-core'
     implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml'
     
@@ -43,6 +43,9 @@ dependencies {
     annotationProcessor 'org.projectlombok:lombok:1.18.30'
     testCompileOnly 'org.projectlombok:lombok:1.18.30'
     testAnnotationProcessor 'org.projectlombok:lombok:1.18.30'
+    
+    // H2 database for development
+    runtimeOnly 'com.h2database:h2:2.2.224'
     
     // SpotBugs dependency
     spotbugsPlugins 'com.h3xstream.findsecbugs:findsecbugs-plugin:1.12.0'
@@ -141,14 +144,14 @@ task magic {
         }
         
         println """
-??????????????????????????????????????????
-?           MAGIC BUILD START            ?
-?----------------------------------------?
-? Parallel: ${magicBuildParallel ? '?' : '?'}                        ?
-? Cache: ${magicBuildCacheEnabled ? '?' : '?'}                          ?
-? Fail Fast: ${magicBuildFailFast ? '?' : '?'}                       ?
-? Processors: ${Runtime.runtime.availableProcessors()}                        ?
-??????????????????????????????????????????
+╔════════════════════════════════════════╗
+║           MAGIC BUILD START            ║
+║----------------------------------------║
+║ Parallel: ${magicBuildParallel ? '✓' : '✗'}                        ║
+║ Cache: ${magicBuildCacheEnabled ? '✓' : '✗'}                          ║
+║ Fail Fast: ${magicBuildFailFast ? '✓' : '✗'}                       ║
+║ Processors: ${Runtime.runtime.availableProcessors()}                        ║
+╚════════════════════════════════════════╝
 """
     }
     
@@ -157,20 +160,27 @@ task magic {
         def qualityResults = tasks.codeQualityCheck.didWork ? tasks.codeQualityCheck.state.failure == null : false
         def coverageResults = tasks.jacocoTestReport.didWork ? tasks.jacocoTestReport.state.failure == null : false
         
-        def coveragePercentage = { -> try { new XmlSlurper().parse(file("${buildDir}/reports/jacoco/test/jacocoTestReport.xml")).counter.find { it.@type == 'LINE' }.@covered.toInteger() * 100 / (it.@missed.toInteger() + it.@covered.toInteger()) } catch (any) { 0 } }.call()
+        def coveragePercentage = { ->
+            try {
+                def xml = new XmlSlurper().parse(file("${buildDir}/reports/jacoco/test/jacocoTestReport.xml"))
+                def counter = xml.counter.find { it.@type == 'LINE' }
+                def covered = counter.@covered.toInteger()
+                def missed = counter.@missed.toInteger()
+                return (covered * 100 / (missed + covered))
+            } catch (any) {
+                return 0
+            }
+        }.call()
+        
         println """
-??????????????????????????????????????????
-?         MAGIC BUILD COMPLETE           ?
-?----------------------------------------?
-? Build: ${project.buildDir}             
-? Tests: ${testResults ? '?' : '?'} (${tasks.test.testResult?.testCount ?: 0} tests)
-? Quality Checks: ${qualityResults ? '?' : '?'} 
-? Coverage: ${coverageResults ? '?' : '?'} (${coveragePercentage}%)
-    new XmlSlurper().parse(file("${buildDir}/reports/jacoco/test/jacocoTestReport.xml"))
-    .counter.find { it.@type == 'LINE' }.@covered.toInteger() * 100 /
-    it.@missed.toInteger()
-} catch (any) { 0 }}%)
-??????????????????????????????????????????
+╔════════════════════════════════════════╗
+║         MAGIC BUILD COMPLETE           ║
+║----------------------------------------║
+║ Build: ${project.buildDir}             
+║ Tests: ${testResults ? '✓' : '✗'} (${tasks.test.testResult?.testCount ?: 0} tests)
+║ Quality Checks: ${qualityResults ? '✓' : '✗'} 
+║ Coverage: ${coverageResults ? '✓' : '✗'} (${coveragePercentage}%)
+╚════════════════════════════════════════╝
 """
     }
 }
@@ -244,9 +254,271 @@ gradle.buildFinished { result ->
         println "\nMagic build completed in ${duration/1000} seconds"
         
         if (!result.failure) {
-            println "\n? Magic build successful! ?"
+            println "\n✓ Magic build successful! ✓"
         } else {
-            println "\n? Magic build failed! Check the logs above for details."
+            println "\n✗ Magic build failed! Check the logs above for details."
         }
     }
 }
+
+// Development helper tasks
+task developmentMode {
+    group = 'application'
+    description = 'Runs the application in development mode with hot reload'
+    
+    doLast {
+        exec {
+            workingDir = projectDir
+            commandLine = ['./gradlew', 'bootRun', '--args=--spring.profiles.active=dev']
+        }
+    }
+}
+
+task dependencyReport(type: org.gradle.api.tasks.diagnostics.DependencyReportTask) {
+    group = 'help'
+    description = 'Displays dependencies for all configurations'
+}
+
+task buildScan {
+    group = 'help'
+    description = 'Creates a build scan to analyze build performance'
+    
+    doLast {
+        println "To enable build scans, add the following to settings.gradle:"
+        println """
+plugins {
+    id "com.gradle.enterprise" version "3.16.1"
+}
+
+gradleEnterprise {
+    buildScan {
+        termsOfServiceUrl = "https://gradle.com/terms-of-service"
+        termsOfServiceAgree = "yes"
+    }
+}
+"""
+    }
+}
+
+// Add custom task to check for dependency updates
+task checkDependencyUpdates {
+    group = 'help'
+    description = 'Checks for dependency updates'
+    
+    doLast {
+        println "To check for dependency updates, add the following to the plugins block:"
+        println """
+id 'com.github.ben-manes.versions' version '0.51.0'
+"""
+        println "Then run: ./gradlew dependencyUpdates"
+    }
+}
+
+// Add a task to run the application with dev profile
+task devRun(type: org.springframework.boot.gradle.tasks.run.BootRun) {
+    group = 'application'
+    description = 'Runs the Spring Boot application with the dev profile'
+    systemProperty 'spring.profiles.active', 'dev'
+    systemProperty 'spring.output.ansi.enabled', 'always'
+}
+
+// Add a useful helper task to list all available tasks with descriptions
+task listTasks {
+    group = 'help'
+    description = 'Lists all available tasks with descriptions in a clean format'
+    
+    doLast {
+        def tasksByGroup = [:]
+        
+        project.tasks.each { task ->
+            if (task.group) {
+                if (!tasksByGroup.containsKey(task.group)) {
+                    tasksByGroup[task.group] = []
+                }
+                tasksByGroup[task.group] << [name: task.name, description: task.description ?: '']
+            }
+        }
+        
+        println "\n╔══════════════════════════════════════════════════════════════════════════════╗"
+        println "║                                 AVAILABLE TASKS                               ║"
+        println "╠══════════════════════════════════════════════════════════════════════════════╣"
+        
+        tasksByGroup.each { group, tasks ->
+            println "║ GROUP: ${group.padRight(75)}║"
+            println "╟──────────────────────────────────────────────────────────────────────────────╢"
+            
+            tasks.sort { it.name }.each { task ->
+                def name = "  ${task.name}"
+                def desc = task.description
+                if (desc) {
+                    println "║ ${name.padRight(30)} │ ${desc.take(44).padRight(44)}║"
+                } else {
+                    println "║ ${name.padRight(30)} │ ${' '.padRight(44)}║"
+                }
+            }
+            
+            println "╠══════════════════════════════════════════════════════════════════════════════╣"
+        }
+        
+        println "╚══════════════════════════════════════════════════════════════════════════════╝"
+    }
+}
+
+// Docker configuration - custom implementation without external plugins
+task createDockerfile(type: Copy) {
+    group = 'docker'
+    description = 'Creates a Dockerfile for the application'
+    
+    from 'src/main/docker'
+    into "${buildDir}/docker"
+    expand([
+        jarFileName: tasks.bootJar.outputs.files.singleFile.name,
+        applicationName: project.name,
+        applicationVersion: project.version,
+        javaVersion: java.toolchain.languageVersion.get()
+    ])
+}
+
+// Create a task to build the Docker image
+task buildDockerImage(type: Exec) {
+    group = 'docker'
+    description = 'Builds a Docker image for the application'
+    dependsOn bootJar, createDockerfile
+    
+    workingDir "${buildDir}/docker"
+    executable 'docker'
+    args = ['build', '-t', "${project.name}:${project.version}", '.']
+    
+    doFirst {
+        // Ensure Dockerfile exists
+        if (!file("${buildDir}/docker/Dockerfile").exists()) {
+            // Create a default Dockerfile if one doesn't exist
+            file("${buildDir}/docker").mkdirs()
+            file("${buildDir}/docker/Dockerfile").text = """
+FROM eclipse-temurin:21-jre
+
+WORKDIR /app
+COPY ${tasks.bootJar.outputs.files.singleFile.name} app.jar
+ENTRYPOINT ["java", "-jar", "app.jar"]
+"""
+        }
+        
+        // Copy the JAR file to the docker directory
+        copy {
+            from tasks.bootJar.outputs.files.singleFile
+            into "${buildDir}/docker"
+        }
+        
+        println "Building Docker image: ${project.name}:${project.version}"
+    }
+}
+
+// Add a task to run the Docker container
+task runDockerContainer(type: Exec) {
+    group = 'docker'
+    description = 'Runs the application in a Docker container'
+    dependsOn buildDockerImage
+    
+    executable 'docker'
+    args = ['run', '--rm', '-p', '8080:8080', "${project.name}:${project.version}"]
+    
+    doFirst {
+        println "Running Docker container: ${project.name}:${project.version}"
+    }
+}
+
+// Add task to publish Docker image
+task publishDockerImage(type: Exec) {
+    group = 'docker'
+    description = 'Publishes the Docker image to a registry'
+    dependsOn buildDockerImage
+    
+    executable 'docker'
+    def registryUrl = project.hasProperty('dockerRegistry') ? project.property('dockerRegistry') : 'localhost:5000'
+    def targetImage = "${registryUrl}/${project.name}:${project.version}"
+    
+    doFirst {
+        // Tag the image
+        exec {
+            executable 'docker'
+            args = ['tag', "${project.name}:${project.version}", targetImage]
+        }
+        println "Publishing Docker image to: ${targetImage}"
+    }
+    
+    args = ['push', targetImage]
+}
+
+// Docker Compose integration
+task composeUp(type: Exec) {
+    group = 'docker'
+    description = 'Starts all Docker Compose services'
+    
+    environment = [
+        'PROJECT_NAME': project.name,
+        'PROJECT_VERSION': project.version
+    ]
+    
+    commandLine 'docker-compose', 'up', '-d'
+    
+    doFirst {
+        println "Starting Docker Compose services for ${project.name}:${project.version}"
+    }
+}
+
+task composeDown(type: Exec) {
+    group = 'docker'
+    description = 'Stops all Docker Compose services'
+    
+    commandLine 'docker-compose', 'down'
+    
+    doFirst {
+        println "Stopping Docker Compose services"
+    }
+}
+
+task composeDownVolumes(type: Exec) {
+    group = 'docker'
+    description = 'Stops all Docker Compose services and removes volumes'
+    
+    commandLine 'docker-compose', 'down', '-v'
+    
+    doFirst {
+        println "Stopping Docker Compose services and removing volumes"
+    }
+}
+
+task composeLogs(type: Exec) {
+    group = 'docker'
+    description = 'Shows logs from Docker Compose services'
+    
+    commandLine 'docker-compose', 'logs', '-f'
+    
+    doFirst {
+        println "Showing Docker Compose logs"
+    }
+}
+
+task composePs(type: Exec) {
+    group = 'docker'
+    description = 'Lists Docker Compose services'
+    
+    commandLine 'docker-compose', 'ps'
+    
+    doFirst {
+        println "Listing Docker Compose services"
+    }
+}
+
+// Add a task to deploy the application with Docker Compose
+task deployWithDocker(dependsOn: [build, composeUp]) {
+    group = 'docker'
+    description = 'Builds the application and deploys it using Docker Compose'
+    
+    doLast {
+        println "Application deployed using Docker Compose"
+    }
+}
+
+// Add Docker Compose tasks to magic build
+magic.dependsOn composePs

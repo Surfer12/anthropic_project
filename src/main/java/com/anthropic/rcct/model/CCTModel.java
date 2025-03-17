@@ -1,64 +1,162 @@
 package com.anthropic.rcct.model;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
-
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 /**
- * Represents a Cognitive Chain of Thought (CCT) model in the system.
- * 
- * This entity serves as a container for a collection of related thoughts that form
- * a cognitive chain or tree structure. Each CCT model can contain multiple thought nodes
- * that are processed recursively to generate insights or visualizations.
- * 
- * The model is used in recursive thought processing, connection evaluation, 
- * and metacognitive analysis operations within the application.
+ * The Cognitive Chain of Thought (CCT) model implements a cross-domain integration
+ * between computational, cognitive, and representational systems. This model manages
+ * a collection of ThoughtNodes, their relationships, and evaluation strategies.
  */
-@Entity
-@Data
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
 public class CCTModel {
+    
     /**
-     * Unique identifier for the CCT model.
+     * Unique identifier for this model
      */
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
     /**
-     * The name of the CCT model.
+     * The name of the CCT model
      */
     private String name;
     
     /**
-     * A detailed description of the CCT model and its purpose.
+     * Description of this model's purpose
      */
     private String description;
     
     /**
-     * Collection of thought nodes that make up this CCT model.
-     * Configured with cascade to ensure proper management of child entities.
+     * Collection of thought nodes managed by this model
      */
-    @OneToMany(cascade = CascadeType.ALL)
     private List<ThoughtNode> thoughts = new ArrayList<>();
     
     /**
-     * Additional metadata about the CCT model, stored as a string.
-     * This may include serialized JSON or other structured data.
+     * Memoization cache for storing computed results to save computational resources
      */
-    private String metadata;
+    private Map<Long, String> memoizationCache = new ConcurrentHashMap<>();
+    
+    /**
+     * Additional metadata and contextual information about the model
+     */
+    private Map<String, Object> metadata = new HashMap<>();
+    
+    /**
+     * Adds a thought node to the model
+     */
+    public void addThought(ThoughtNode thought) {
+        thoughts.add(thought);
+    }
+    
+    /**
+     * Returns a list of all root thought nodes (nodes with no parent)
+     */
+    public List<ThoughtNode> getRootThoughtNodes() {
+        return thoughts.stream()
+                .filter(node -> node.getParentId() == null)
+                .collect(Collectors.toList());
+    }
+    
+    /**
+     * Returns a list of child thought nodes for a given parent ID
+     */
+    public List<ThoughtNode> getChildThoughtNodes(Long parentId) {
+        return thoughts.stream()
+                .filter(node -> parentId.equals(node.getParentId()))
+                .collect(Collectors.toList());
+    }
+    
+    /**
+     * Finds a thought node by its ID
+     */
+    public ThoughtNode findThoughtById(Long id) {
+        return thoughts.stream()
+                .filter(node -> id.equals(node.getId()))
+                .findFirst()
+                .orElse(null);
+    }
+    
+    /**
+     * Clear the memoization cache to force re-evaluation of thoughts
+     */
+    public void clearMemoizationCache() {
+        memoizationCache.clear();
+    }
+    
+    /**
+     * Updates the memoization cache for a specific thought
+     */
+    public void updateMemoizationCache(Long thoughtId, String result) {
+        memoizationCache.put(thoughtId, result);
+    }
+    
+    /**
+     * Calculates the estimated complexity of a thought node and its subtree
+     */
+    public double calculateNodeComplexity(ThoughtNode node) {
+        // Base complexity based on content size
+        double baseComplexity = Math.min(1.0, node.getContent().length() / 1000.0);
+        
+        // Add complexity for having many child nodes
+        List<ThoughtNode> children = getChildThoughtNodes(node.getId());
+        double childComplexity = Math.min(0.5, children.size() * 0.1);
+        
+        // Add complexity for depth
+        double depthComplexity = Math.min(0.3, (node.getDepth() == null ? 0 : node.getDepth()) * 0.05);
+        
+        return Math.min(1.0, baseComplexity + childComplexity + depthComplexity);
+    }
+    
+    // Getters and setters
+    
+    public Long getId() {
+        return id;
+    }
+    
+    public void setId(Long id) {
+        this.id = id;
+    }
+    
+    public String getName() {
+        return name;
+    }
+    
+    public void setName(String name) {
+        this.name = name;
+    }
+    
+    public String getDescription() {
+        return description;
+    }
+    
+    public void setDescription(String description) {
+        this.description = description;
+    }
+    
+    public List<ThoughtNode> getThoughts() {
+        return thoughts;
+    }
+    
+    public void setThoughts(List<ThoughtNode> thoughts) {
+        this.thoughts = thoughts;
+    }
+    
+    public Map<Long, String> getMemoizationCache() {
+        return memoizationCache;
+    }
+    
+    public void setMemoizationCache(Map<Long, String> memoizationCache) {
+        this.memoizationCache = memoizationCache;
+    }
+    
+    public Map<String, Object> getMetadata() {
+        return metadata;
+    }
+    
+    public void setMetadata(Map<String, Object> metadata) {
+        this.metadata = metadata;
+    }
 }
