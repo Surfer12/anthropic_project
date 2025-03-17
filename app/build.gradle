@@ -38,6 +38,9 @@ dependencies {
     implementation 'io.projectreactor:reactor-core'
     implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml'
     
+    // SpotBugs dependency
+    spotbugsPlugins 'com.h3xstream.findsecbugs:findsecbugs-plugin:1.12.0'
+    
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'io.projectreactor:reactor-test'
 }
