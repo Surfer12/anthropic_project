@@ -38,6 +38,12 @@ dependencies {
     implementation 'io.projectreactor:reactor-core'
     implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml'
     
+    // Lombok for reducing boilerplate code
+    compileOnly 'org.projectlombok:lombok:1.18.30'
+    annotationProcessor 'org.projectlombok:lombok:1.18.30'
+    testCompileOnly 'org.projectlombok:lombok:1.18.30'
+    testAnnotationProcessor 'org.projectlombok:lombok:1.18.30'
+    
     // SpotBugs dependency
     spotbugsPlugins 'com.h3xstream.findsecbugs:findsecbugs-plugin:1.12.0'
     
