@@ -1,17 +1,18 @@
-Metadata-Version: 2.2
+Metadata-Version: 2.1
 Name: anthropic-client
 Version: 0.1.0
-Summary: A Python client for interacting with Anthropic's Claude models
+Summary: Anthropic client with Mojo integration
 Home-page: https://github.com/surfer12/anthropic_project
-Author: Ryan Oates
+Author: Surfer12
 Author-email: ryanoatsie@outlook.com
+License: UNKNOWN
+Platform: UNKNOWN
+Classifier: Development Status :: 3 - Alpha
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3.12
 Requires-Python: >=3.12
-Description-Content-Type: text/markdown
 License-File: LICENSE
-Requires-Dist: anthropic<0.50,>=0.49.0
-Requires-Dist: python-dotenv<2,>=1.0.1
-Dynamic: author-email
-Dynamic: home-page
-Dynamic: requires-python
 
- 
+UNKNOWN
+
