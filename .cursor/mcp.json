@@ -1,0 +1,8 @@
+{
+    "mcpServers": {
+        "name": "MCP_DOCKER",
+        "description": "mcp docker",
+        "command": "docker run -i --rm alpine/socat STDIO TCP:host.docker.internal:8811"
+    }
+}
+    

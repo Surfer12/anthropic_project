@@ -16,10 +16,10 @@ struct ClientConfig:
     var temperature: Float64
     
     fn __init__(mut self, api_key: String, 
-                model: String = "claude-3-7-sonnet-20250219",
-                max_tokens: Int = 128000,
-                thinking_budget: Int = 120000,
-                temperature: Float64 = 1.0):
+                model: String = "claude-3-opus-20240229",
+                temperature: Float64 = 0.7,
+                max_tokens: Int = 4096,
+                thinking_budget: Int = 2000) raises:
         # Add input validation
         if temperature < 0.0 or temperature > 1.0:
             raise Error("Temperature must be between 0.0 and 1.0")
@@ -87,7 +87,15 @@ struct AnthropicClient:
         response_params["max_tokens"] = self.config.max_tokens
         response_params["messages"] = messages_list
         response_params["temperature"] = self.config.temperature
-        response_params["thinking"] = {"type": "enabled", "budget_tokens": self.config.thinking_budget}
+        
+        # Create a separate Python dictionary for thinking params
+        var thinking_params = Python.dict()
+        thinking_params["type"] = "enabled"
+        thinking_params["budget_tokens"] = self.config.thinking_budget
+        
+        # Assign it to the response_params
+        response_params["thinking"] = thinking_params
+        
         response_params["betas"] = ["output-128k-2025-02-19"]
         
         # Direct Python function call

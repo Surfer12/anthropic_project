@@ -1,14 +1,12 @@
 package com.anthropic.rcct.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Builder;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Represents a single thought or node within a Cognitive Chain of Thought (CCT) model.
@@ -21,49 +19,70 @@ import lombok.Setter;
  * ThoughtNodes are processed by the ThoughtProcessingService for recursive analysis,
  * connection evaluation, and meta-cognitive operations.
  */
-@Entity
 @Data
-@Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class ThoughtNode {
     /**
      * Unique identifier for the thought node.
      */
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
     /**
-     * The actual content of the thought, typically text that represents
-     * an idea, observation, or reasoning step.
+     * The textual content of this thought
      */
     private String content;
     
     /**
-     * The type of thought, which categorizes the thought according to its
-     * function or role in the cognitive process (e.g., "analysis", "reflection", 
-     * "observation", "meta").
+     * The type of thought (e.g., "analysis", "reflection", "observation")
      */
     private String type;
     
     /**
-     * The depth level of this thought in the hierarchy, with higher numbers
-     * typically representing more detailed or deeper levels of thinking.
+     * The depth level of this thought in the hierarchy (0 = root)
      */
     private Integer depth;
     
     /**
-     * The ID of the parent thought node, establishing hierarchical relationships
-     * between thoughts. A null value typically indicates a root-level thought.
+     * The ID of the parent thought node, or null if this is a root thought
      */
     private Long parentId;
     
     /**
-     * Additional metadata about the thought node, stored as a string.
-     * This may include serialized JSON or other structured data about the thought's
-     * properties, context, or relationships.
+     * Aliases a reference to another node (similar to YAML anchors)
      */
-    private String metadata;
+    private ThoughtNode aliasNode;
+    
+    /**
+     * Child thoughts that are part of this thought
+     */
+    @Builder.Default
+    private List<ThoughtNode> subThoughts = new ArrayList<>();
+    
+    /**
+     * Cached result for memoization
+     */
+    private String cachedInsight;
+    
+    /**
+     * Attentional focus weighting for this thought (0.0 to 1.0)
+     */
+    private Double attentionalWeight;
+    
+    /**
+     * Estimated complexity of this thought node (0.0 to 1.0)
+     */
+    private Double complexity;
+    
+    /**
+     * Last time this thought was processed
+     */
+    private Long lastProcessedTimestamp;
+    
+    /**
+     * Count of how many times this thought has been processed
+     */
+    @Builder.Default
+    private Integer processingCount = 0;
 }
