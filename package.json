@@ -21,7 +21,7 @@
   },
   "homepage": "https://github.com/Surfer12/anthropic_project#readme",
   "dependencies": {
-    "@anthropic-ai/claude-code": "^0.2.36",
+    "@anthropic-ai/claude-code": "^0.2.113",
     "@anthropic-ai/sdk": "^0.39.0"
   }
 }
